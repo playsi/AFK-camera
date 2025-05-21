@@ -16,6 +16,7 @@ public class AfkcamClient implements ClientModInitializer {
         if (Config.GSON.load()) {
             config = Config.GSON.instance();
         }
+
         CinematicCameraResourceReloadListener.register();
         CinematicCameraCommands.register();
 
