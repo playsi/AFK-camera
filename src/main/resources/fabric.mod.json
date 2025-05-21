@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "id": "afkcam",
+  "version": "${version}",
+  "name": "AFKCam",
+  "description": "",
+  "authors": [],
+  "contact": {},
+  "license": "All-Rights-Reserved",
+  "icon": "assets/afkcam/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-datagen": [
+      "org.playsi.afkcam.client.AfkcamDataGenerator"
+    ],
+    "client": [
+      "org.playsi.afkcam.client.AfkcamClient"
+    ],
+    "main": [
+      "org.playsi.afkcam.Afkcam"
+    ],
+    "modmenu": [
+      "org.playsi.afkcam.client.modMenu.ModMenuIntegration"
+    ]
+  },
+  "mixins": [
+    "afkcam.mixins.json",
+    {
+      "config": "afkcam.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}

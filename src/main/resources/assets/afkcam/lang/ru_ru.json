@@ -1,0 +1,24 @@
+{
+  "modmenu.descriptionTranslation.afkcam": "AFKCam — клиентский мод для Minecraft, активирующий кинематографическую камеру при бездействии игрока.",
+
+  "afkcam.modmenu.title": "Настройки мода AFKCam",
+  "afkcam.category.general": "Общие",
+
+  "afkcam.option.modEnabled": "Включить мод",
+  "afkcam.option.modEnabled.desc": "Включает или отключает мод AFKCam.",
+
+  "afkcam.option.debugLogEnabled":"Включить отладку" ,
+  "afkcam.option.debugLogEnabled.desc": "Если включено, системная информация будет отображаться в консоли и логах (полезно для разработчиков ресурспаков).",
+
+  "afkcam.option.cameraSpeed": "Скорость камеры",
+  "afkcam.option.cameraSpeed.desc": "Определяет скорость движения камеры по маршруту.",
+
+  "afkcam.option.fade": "Плавные переходы (затухание)",
+  "afkcam.option.fade.desc": "Добавляет плавные затухания между ключевыми кадрами камеры.",
+
+  "afkcam.option.fadeIn": "Время появления",
+  "afkcam.option.fadeIn.desc": "Время (в секундах), за которое камера появляется в начале маршрута.",
+
+  "afkcam.option.fadeOut": "Время исчезновения",
+  "afkcam.option.fadeOut.desc": "Время (в секундах), за которое камера исчезает в конце маршрута."
+}
