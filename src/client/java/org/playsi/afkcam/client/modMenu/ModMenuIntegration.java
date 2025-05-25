@@ -45,6 +45,15 @@ public class ModMenuIntegration implements ModMenuApi {
                                 )
 
                                 .option(
+                                        Option.<Integer>createBuilder()
+                                                .name(Text.translatable("afkcam.option.activationAfter"))
+                                                .description(OptionDescription.of(Text.translatable("afkcam.option.activationAfter.desc")))
+                                                .stateManager(StateManager.createSimple(def.getActivationAfter(), config::getActivationAfter, config::setActivationAfter))
+                                                .customController(IntegerFieldController::new)
+                                                .build()
+                                )
+
+                                .option(
                                         Option.<Double>createBuilder()
                                                 .name(Text.translatable("afkcam.option.cameraSpeed"))
                                                 .description(OptionDescription.of(Text.translatable("afkcam.option.cameraSpeed.desc")))

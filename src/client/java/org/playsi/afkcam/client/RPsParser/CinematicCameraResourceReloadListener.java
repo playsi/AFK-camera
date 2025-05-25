@@ -1,6 +1,7 @@
 package org.playsi.afkcam.client.RPsParser;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -10,7 +11,7 @@ import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 import org.playsi.afkcam.client.AfkcamClient;
-import org.playsi.afkcam.client.Utils.CameraAnimation;
+import org.playsi.afkcam.client.Utils.ParsedAnimation;
 import org.playsi.afkcam.client.Utils.LogUtils;
 import java.io.BufferedReader;
 import java.io.InputStream;
@@ -26,13 +27,13 @@ import java.util.concurrent.Executor;
  * Reload listener that scans cinematic_camera .bbmodel files and parses camera animations.
  */
 @Environment(EnvType.CLIENT)
-public class CinematicCameraResourceReloadListener implements SimpleResourceReloadListener<List<CameraAnimation>> {
+public class CinematicCameraResourceReloadListener implements SimpleResourceReloadListener<List<ParsedAnimation>> {
     private static final LogUtils LOGGER = new LogUtils(BBModelParser.class);
     private static final Identifier ID = Identifier.of("cinematic:camera_reload");
     private static final String BBE_PATH = "cinematic_camera";
 
     @Getter
-    private static List<CameraAnimation> cachedAnimations = new ArrayList<>();
+    private static List<ParsedAnimation> cachedAnimations = new ArrayList<>();
 
     public static void register() {
         ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES)
@@ -45,12 +46,12 @@ public class CinematicCameraResourceReloadListener implements SimpleResourceRelo
     }
 
     @Override
-    public CompletableFuture<List<CameraAnimation>> load(ResourceManager manager, Executor executor) {
+    public CompletableFuture<List<ParsedAnimation>> load(ResourceManager manager, Executor executor) {
         return CompletableFuture.supplyAsync(() -> {
             if (!AfkcamClient.getConfig().isModEnabled()) {
                 return new ArrayList<>();
             }
-            List<CameraAnimation> animations = new ArrayList<>();
+            List<ParsedAnimation> animations = new ArrayList<>();
 
             Map<Identifier, Resource> resources = manager.findResources(BBE_PATH, id -> true);
             if (resources.isEmpty()) {
@@ -80,13 +81,13 @@ public class CinematicCameraResourceReloadListener implements SimpleResourceRelo
                                  new InputStreamReader(is, StandardCharsets.UTF_8))) {
 
                         // Use BBModelParser to parse the file
-                        List<CameraAnimation> parsedAnimations = BBModelParser.parseAnimationsFromJson(reader);
+                        List<ParsedAnimation> parsedAnimations = BBModelParser.parseAnimationsFromJson(reader);
 
                         if (parsedAnimations.isEmpty()) {
                             LOGGER.errorDebug("No camera animations extracted from file: " + id);
                         } else {
                             LOGGER.infoDebug("Successfully found " + parsedAnimations.size() + " camera animations in: " + id);
-                            for (CameraAnimation anim : parsedAnimations) {
+                            for (ParsedAnimation anim : parsedAnimations) {
                                 LOGGER.info("- Animation: " + anim.getName() +
                                         " (pos keys: " + anim.getPositionKeyframes().size() +
                                         ", rot keys: " + anim.getRotationKeyframes().size() + ")");
@@ -105,9 +106,10 @@ public class CinematicCameraResourceReloadListener implements SimpleResourceRelo
     }
 
     @Override
-    public CompletableFuture<Void> apply(List<CameraAnimation> animations, ResourceManager manager, Executor executor) {
+    public CompletableFuture<Void> apply(List<ParsedAnimation> animations, ResourceManager manager, Executor executor) {
         return CompletableFuture.runAsync(() -> {
             cachedAnimations = animations;
+
             LOGGER.infoDebug("Loaded camera animations: " + animations.size());
             if (animations.isEmpty()) {
                 LOGGER.warnDebug("No camera animations were loaded! Check your resource files.");

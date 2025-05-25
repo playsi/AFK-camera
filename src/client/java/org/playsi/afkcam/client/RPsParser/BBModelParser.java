@@ -4,19 +4,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.playsi.afkcam.Afkcam;
-import org.playsi.afkcam.client.AfkcamClient;
-import org.playsi.afkcam.client.Utils.CameraAnimation;
+import org.playsi.afkcam.client.Utils.ParsedAnimation;
 import org.playsi.afkcam.client.Utils.LogUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static org.playsi.afkcam.client.Utils.CameraAnimation.parseFloatValue;
+import static org.playsi.afkcam.client.Utils.ParsedAnimation.parseFloatValue;
 
 /**
  * Parser for BBModel files to extract camera animations.
@@ -30,8 +25,8 @@ public class BBModelParser {
      * @param reader The reader containing JSON data
      * @return List of parsed camera animations
      */
-    public static List<CameraAnimation> parseAnimationsFromJson(BufferedReader reader) {
-        List<CameraAnimation> animations = new ArrayList<>();
+    public static List<ParsedAnimation> parseAnimationsFromJson(BufferedReader reader) {
+        List<ParsedAnimation> animations = new ArrayList<>();
         JsonElement root = JsonParser.parseReader(reader);
 
         if (!root.isJsonObject()) {
@@ -95,7 +90,7 @@ public class BBModelParser {
      * @param animArray The JSON array containing animation data
      * @param animations The list to add parsed animations to
      */
-    private static void parseAnimationsFromArray(JsonArray animArray, List<CameraAnimation> animations) {
+    private static void parseAnimationsFromArray(JsonArray animArray, List<ParsedAnimation> animations) {
         for (JsonElement animEl : animArray) {
             if (!animEl.isJsonObject()) continue;
 
@@ -143,7 +138,7 @@ public class BBModelParser {
                 foundCameraAnimator = true;
 
                 // Create camera animation object
-                CameraAnimation camAnim = new CameraAnimation(animationName);
+                ParsedAnimation camAnim = new ParsedAnimation(animationName);
 
                 // Check for keyframes
                 if (!animatorObj.has("keyframes")) {
@@ -183,7 +178,7 @@ public class BBModelParser {
      * @param camAnim The camera animation to add keyframes to
      * @param animationName The name of the animation (for logging)
      */
-    private static void parseKeyframes(JsonArray keys, CameraAnimation camAnim, String animationName) {
+    private static void parseKeyframes(JsonArray keys, ParsedAnimation camAnim, String animationName) {
         for (JsonElement keyEl : keys) {
             if (!keyEl.isJsonObject()) continue;
 

@@ -10,12 +10,12 @@ import java.util.List;
  * Holds camera animation keyframes.
  */
 @Getter
-public class CameraAnimation {
+public class ParsedAnimation {
     private final String name;
     private final List<Keyframe> positionKeyframes = new ArrayList<>();
     private final List<Keyframe> rotationKeyframes = new ArrayList<>();
 
-    public CameraAnimation(String name) {
+    public ParsedAnimation(String name) {
         this.name = name;
     }
 
