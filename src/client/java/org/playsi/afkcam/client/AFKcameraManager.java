@@ -91,7 +91,7 @@ public class AFKcameraManager {
             lastActivityTime = System.currentTimeMillis();
         }
         long timeSinceActivity = System.currentTimeMillis() - lastActivityTime;
-        return timeSinceActivity >= (long) CONFIG.getActivationAfter() * 60L * 1000L;
+        return timeSinceActivity >= (long) CONFIG.getActivationAfter() * 60L * 250L; //1000L but 250L
     }
 
     private static boolean hasPlayerActivity() {
@@ -227,70 +227,113 @@ public class AFKcameraManager {
     private static void convertAndLoadAnimation(ParsedAnimation animation) {
         CameraAnimationManager.clearKeyframes();
 
-        Set<Float> timePoints = new TreeSet<>();
-        animation.getPositionKeyframes().forEach(kf -> timePoints.add(kf.getTime()));
-        animation.getRotationKeyframes().forEach(kf -> timePoints.add(kf.getTime()));
+        List<ParsedAnimation.Keyframe> posFrames = animation.getPositionKeyframes();
+        List<ParsedAnimation.Keyframe> rotFrames = animation.getRotationKeyframes();
 
-        // Создаем keyframe для каждой временной точки
-        for (Float time : timePoints) {
-            // Интерполируем позицию на данное время
-            float[] position = interpolatePosition(animation, time);
-            float[] rotation = interpolateRotation(animation, time);
+        Map<Float, ParsedAnimation.Keyframe> rotationMap = new HashMap<>();
+        for (ParsedAnimation.Keyframe rotFrame : rotFrames) {
+            rotationMap.put(rotFrame.getTime(), rotFrame);
+        }
 
-            // Определяем тип интерполяции
-            CameraKeyframe.InterpolationType interpType = getInterpolationType(animation, time);
+        for (ParsedAnimation.Keyframe posFrame : posFrames) {
+            float time = posFrame.getTime();
+            float[] position = posFrame.getValues();
+
+            float[] rotation = findOrInterpolateRotation(rotFrames, time);
+
+            CameraKeyframe.InterpolationType interpType = CameraKeyframe.InterpolationType.LINEAR;
 
             CameraAnimationManager.addKeyframe(
-                    time, // Сдвигаем на время fade-in
+                    time,
                     position[0], position[1], position[2],
-                    rotation[0], rotation[1],
+                    rotation[1], rotation[0], // yaw, pitch
                     interpType
             );
         }
-    }
 
-    /**
-     * Интерполяция позиции для заданного времени
-     */
-    private static float[] interpolatePosition(ParsedAnimation animation, float time) {
-        List<ParsedAnimation.Keyframe> posFrames = animation.getPositionKeyframes();
-        if (posFrames.isEmpty()) return new float[]{0, 0, 0};
+        for (ParsedAnimation.Keyframe rotFrame : rotFrames) {
+            float time = rotFrame.getTime();
+            if (posFrames.stream().noneMatch(pf -> Math.abs(pf.getTime() - time) < 0.001f)) {
+                float[] position = findOrInterpolatePosition(posFrames, time);
+                float[] rotation = rotFrame.getValues();
 
-        // Простейшая интерполяция - можно улучшить
-        for (int i = 0; i < posFrames.size(); i++) {
-            if (posFrames.get(i).getTime() >= time) {
-                return posFrames.get(i).getValues();
+                CameraAnimationManager.addKeyframe(
+                        time,
+                        position[0], position[1], position[2],
+                        rotation[1], rotation[0], // yaw, pitch
+                        CameraKeyframe.InterpolationType.LINEAR
+                );
             }
         }
-
-        return posFrames.get(posFrames.size() - 1).getValues();
     }
-
-    /**
-     * Интерполяция поворота для заданного времени
-     */
-    private static float[] interpolateRotation(ParsedAnimation animation, float time) {
-        List<ParsedAnimation.Keyframe> rotFrames = animation.getRotationKeyframes();
+    private static float[] findOrInterpolateRotation(List<ParsedAnimation.Keyframe> rotFrames, float time) {
         if (rotFrames.isEmpty()) return new float[]{0, 0};
 
-        // Простейшая интерполяция - можно улучшить
-        for (int i = 0; i < rotFrames.size(); i++) {
-            if (rotFrames.get(i).getTime() >= time) {
-                float[] values = rotFrames.get(i).getValues();
-                return new float[]{values[1], values[0]}; // yaw, pitch
+        for (ParsedAnimation.Keyframe frame : rotFrames) {
+            if (Math.abs(frame.getTime() - time) < 0.001f) {
+                return frame.getValues();
             }
         }
 
-        float[] values = rotFrames.get(rotFrames.size() - 1).getValues();
-        return new float[]{values[1], values[0]}; // yaw, pitch
+        ParsedAnimation.Keyframe prevFrame = null;
+        ParsedAnimation.Keyframe nextFrame = null;
+
+        for (ParsedAnimation.Keyframe frame : rotFrames) {
+            if (frame.getTime() <= time) {
+                prevFrame = frame;
+            } else if (nextFrame == null) {
+                nextFrame = frame;
+                break;
+            }
+        }
+
+        if (prevFrame == null) return rotFrames.get(0).getValues();
+        if (nextFrame == null) return rotFrames.get(rotFrames.size() - 1).getValues();
+
+        float t = (time - prevFrame.getTime()) / (nextFrame.getTime() - prevFrame.getTime());
+        float[] prevRot = prevFrame.getValues();
+        float[] nextRot = nextFrame.getValues();
+
+        return new float[]{
+                prevRot[0] + (nextRot[0] - prevRot[0]) * t, // pitch
+                prevRot[1] + (nextRot[1] - prevRot[1]) * t  // yaw
+        };
     }
 
-    /**
-     * Определение типа интерполяции
-     */
-    private static CameraKeyframe.InterpolationType getInterpolationType(ParsedAnimation animation, float time) {
-        // Можно улучшить логику определения типа интерполяции
-        return CameraKeyframe.InterpolationType.LINEAR;//TODO
+
+    private static float[] findOrInterpolatePosition(List<ParsedAnimation.Keyframe> posFrames, float time) {
+        if (posFrames.isEmpty()) return new float[]{0, 0, 0};
+
+        for (ParsedAnimation.Keyframe frame : posFrames) {
+            if (Math.abs(frame.getTime() - time) < 0.001f) {
+                return frame.getValues();
+            }
+        }
+
+        ParsedAnimation.Keyframe prevFrame = null;
+        ParsedAnimation.Keyframe nextFrame = null;
+
+        for (ParsedAnimation.Keyframe frame : posFrames) {
+            if (frame.getTime() <= time) {
+                prevFrame = frame;
+            } else if (nextFrame == null) {
+                nextFrame = frame;
+                break;
+            }
+        }
+
+        if (prevFrame == null) return posFrames.get(0).getValues();
+        if (nextFrame == null) return posFrames.get(posFrames.size() - 1).getValues();
+
+        float t = (time - prevFrame.getTime()) / (nextFrame.getTime() - prevFrame.getTime());
+        float[] prevPos = prevFrame.getValues();
+        float[] nextPos = nextFrame.getValues();
+
+        return new float[]{
+                prevPos[0] + (nextPos[0] - prevPos[0]) * t,
+                prevPos[1] + (nextPos[1] - prevPos[1]) * t,
+                prevPos[2] + (nextPos[2] - prevPos[2]) * t
+        };
     }
 
     private static void hidePlayerHud() {
