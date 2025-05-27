@@ -31,6 +31,9 @@ public class Config {
     private double cameraSpeed = 1.0;
 
     @SerialEntry
+    private boolean cameraFollow = false;
+
+    @SerialEntry
     private boolean fade = true;
 
     @SerialEntry
