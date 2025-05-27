@@ -61,7 +61,17 @@ public class ModMenuIntegration implements ModMenuApi {
                                                 .customController(DoubleFieldController::new)
                                                 .build()
                                 )
+
+                                .option(
+                                        Option.<Boolean>createBuilder()
+                                                .name(Text.translatable("afkcam.option.cameraFollow"))
+                                                .description(OptionDescription.of(Text.translatable("afkcam.option.cameraFollow.desc")))
+                                                .stateManager(StateManager.createSimple(def.isCameraFollow(), config::isCameraFollow, config::setCameraFollow))
+                                                .customController(BooleanController::new)
+                                                .build()
+                                )
                                 .build())
+
 
                         .group(OptionGroup.createBuilder()
 
