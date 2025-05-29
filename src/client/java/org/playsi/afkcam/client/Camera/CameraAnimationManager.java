@@ -17,17 +17,18 @@ public class CameraAnimationManager {
     private static final List<CameraKeyframe> keyframes = new ArrayList<>();
 
     private static boolean isPlaying = false;
-    private static float currentTime = 0.0f;
+    // Используем double для времени для большей точности
+    private static double currentTime = 0.0;
     private static long lastRenderTime = 0;
 
-    // Позиция игрока на момент начала анимации
+    // Позиция игрока на момент начала анимации - используем double
     private static double basePlayerX = 0.0;
     private static double basePlayerY = 0.0;
     private static double basePlayerZ = 0.0;
-    private static float basePlayerYaw = 0.0f;
+    private static double basePlayerYaw = 0.0;
 
-    // Добавление ключевого кадра
-    public static void addKeyframe(float time, double x, double y, double z, float yaw, float pitch,
+    // Добавление ключевого кадра - изменяем time на double
+    public static void addKeyframe(double time, double x, double y, double z, double yaw, double pitch,
                                    CameraKeyframe.InterpolationType interpolation) {
         CameraKeyframe keyframe = new CameraKeyframe(time, x, y, z, yaw, pitch, interpolation);
 
@@ -47,28 +48,6 @@ public class CameraAnimationManager {
         }
     }
 
-    // Добавление ключевого кадра с текущей позицией камеры (относительно игрока)
-    public static void addKeyframeAtCurrentPosition(float time, CameraKeyframe.InterpolationType interpolation) {
-        if (FreeCamManager.getFreeCamera() == null || MC.player == null) {
-            LOGGER.infoDebug("Нет активной камеры или игрока для создания ключевого кадра");
-            return;
-        }
-
-        FreeCamera camera = FreeCamManager.getFreeCamera();
-        PlayerEntity player = MC.player;
-
-        double relativeX = camera.getX() - player.getX();
-        double relativeY = camera.getY() - player.getY();
-        double relativeZ = camera.getZ() - player.getZ();
-
-        float playerYawRounded = roundToNearest90(player.getYaw());
-        float relativeYaw = camera.getYaw() - playerYawRounded;
-
-        float pitch = camera.getPitch();
-
-        addKeyframe(time, relativeX, relativeY, relativeZ, relativeYaw, pitch, interpolation);
-    }
-
     public static boolean removeKeyframe(int index) {
         if (index >= 0 && index < keyframes.size()) {
             CameraKeyframe removed = keyframes.remove(index);
@@ -80,10 +59,10 @@ public class CameraAnimationManager {
         return false;
     }
 
-    // Удаление ключевого кадра по времени
-    public static boolean removeKeyframeAtTime(float time) {
+    // Удаление ключевого кадра по времени - используем double
+    public static boolean removeKeyframeAtTime(double time) {
         for (int i = 0; i < keyframes.size(); i++) {
-            if (Math.abs(keyframes.get(i).getTime() - time) < 0.01f) {
+            if (Math.abs(keyframes.get(i).getTime() - time) < 0.001) { // Увеличили точность
                 return removeKeyframe(i);
             }
         }
@@ -119,7 +98,7 @@ public class CameraAnimationManager {
         basePlayerYaw = roundToNearest90(player.getYaw());
 
         isPlaying = true;
-        currentTime = 0.0f;
+        currentTime = 0.0;
         lastRenderTime = System.nanoTime();
 
         LOGGER.infoDebug("Начато воспроизведение анимации камеры относительно позиции игрока: "
@@ -141,8 +120,8 @@ public class CameraAnimationManager {
         }
     }
 
-    // Перемотка к определенному времени
-    public static void seekToTime(float time) {
+    // Перемотка к определенному времени - используем double
+    public static void seekToTime(double time) {
         currentTime = Math.max(0, time);
         if (isPlaying) {
             lastRenderTime = System.nanoTime();
@@ -157,12 +136,13 @@ public class CameraAnimationManager {
         }
 
         long currentSystemTime = System.nanoTime();
-        float deltaTime = (currentSystemTime - lastRenderTime) / 1_000_000_000.0f;
+        // Используем double для deltaTime для большей точности
+        double deltaTime = (currentSystemTime - lastRenderTime) / 1_000_000_000.0;
         lastRenderTime = currentSystemTime;
 
         currentTime += deltaTime;
 
-        float maxTime = keyframes.get(keyframes.size() - 1).getTime();
+        double maxTime = keyframes.get(keyframes.size() - 1).getTime();
         if (currentTime > maxTime) {
             currentTime = maxTime;
             stopPlayback();
@@ -178,12 +158,13 @@ public class CameraAnimationManager {
         }
 
         long currentSystemTime = System.nanoTime();
-        float deltaTime = (currentSystemTime - lastRenderTime) / 1_000_000_000.0f;
+        // Используем double для deltaTime для большей точности
+        double deltaTime = (currentSystemTime - lastRenderTime) / 1_000_000_000.0;
         lastRenderTime = currentSystemTime;
 
         currentTime += deltaTime;
 
-        float maxTime = keyframes.get(keyframes.size() - 1).getTime();
+        double maxTime = keyframes.get(keyframes.size() - 1).getTime();
         if (currentTime > maxTime) {
             currentTime = maxTime;
             stopPlayback();
@@ -206,59 +187,55 @@ public class CameraAnimationManager {
         FreeCamManager.getFreeCamera().applyPosition(absolutePosition);
     }
 
-    // Преобразование относительной позиции в абсолютную
     private static FreecamPosition convertToAbsolutePosition(FreecamPosition relativePosition) {
         PlayerEntity player = MC.player;
-
-        // Текущая позиция игрока
         double currentPlayerX = player.getX();
         double currentPlayerY = player.getY();
         double currentPlayerZ = player.getZ();
-        float currentPlayerYaw = roundToNearest90(player.getYaw());
+        double currentPlayerYaw = Math.toRadians(roundToNearest90(player.getYaw()));
 
-        // Вычисляем смещение от базовой позиции
-        double deltaX = currentPlayerX - basePlayerX;
-        double deltaY = currentPlayerY - basePlayerY;
-        double deltaZ = currentPlayerZ - basePlayerZ;
-        float deltaYaw = currentPlayerYaw - basePlayerYaw;
+        // Применяем поворот к относительным координатам
+        double relX = relativePosition.getX();
+        double relZ = relativePosition.getZ();
 
-        // Применяем поворот к относительным координатам, если yaw изменился
-        double rotatedX = relativePosition.getX();
-        double rotatedZ = relativePosition.getZ();
+        double rotatedX = relX * Math.cos(currentPlayerYaw) - relZ * Math.sin(currentPlayerYaw);
+        double rotatedZ = relX * Math.sin(currentPlayerYaw) + relZ * Math.cos(currentPlayerYaw);
 
-        if (Math.abs(deltaYaw) > 0.1f) {
-            double radians = Math.toRadians(deltaYaw);
-            double cos = Math.cos(radians);
-            double sin = Math.sin(radians);
-
-            rotatedX = relativePosition.getX() * cos - relativePosition.getZ() * sin;
-            rotatedZ = relativePosition.getX() * sin + relativePosition.getZ() * cos;
-        }
-
-        // Создаем абсолютную позицию
         FreecamPosition absolutePosition = new FreecamPosition();
-        absolutePosition.setX(currentPlayerX + rotatedX);
-        absolutePosition.setY(currentPlayerY + relativePosition.getY());
-        absolutePosition.setZ(currentPlayerZ + rotatedZ);
+        double playerYaw = roundToNearest90(player.getYaw());
 
-        // Yaw = текущий округленный yaw игрока + относительный yaw анимации
-        // Pitch остается из анимации (не относительный)
-        absolutePosition.setRotation(
-                currentPlayerYaw + relativePosition.getYaw(),
-                relativePosition.getPitch()
-        );
+        if (playerYaw == 0f || playerYaw == 180f){
+            absolutePosition.setX(currentPlayerX + rotatedX);
+            absolutePosition.setY(currentPlayerY + relativePosition.getY());
+            absolutePosition.setZ(currentPlayerZ - rotatedZ);
+
+            absolutePosition.setRotation(
+                    player.getYaw() + relativePosition.getYaw(),
+                    relativePosition.getPitch()
+            );
+
+        }else if ( playerYaw == 90f || playerYaw == 270f) {
+            absolutePosition.setX(currentPlayerX - rotatedX);
+            absolutePosition.setY(currentPlayerY + relativePosition.getY());
+            absolutePosition.setZ(currentPlayerZ + rotatedZ);
+
+            absolutePosition.setRotation(
+                    player.getYaw() + relativePosition.getYaw(),
+                    relativePosition.getPitch()
+            );
+        }
 
         return absolutePosition;
     }
 
-    // Округление угла до ближайших 90 градусов
-    private static float roundToNearest90(float angle) {
+    // Округление угла до ближайших 90 градусов - возвращаем double
+    private static double roundToNearest90(double angle) {
         // Нормализуем угол в диапазон 0-360
         while (angle < 0) angle += 360;
         while (angle >= 360) angle -= 360;
 
         // Округляем до ближайших 90 градусов
-        int rounded = Math.round(angle / 90.0f) * 90;
+        long rounded = Math.round(angle / 90.0) * 90;
 
         // Возвращаем в диапазон 0-360
         return rounded % 360;
@@ -274,8 +251,8 @@ public class CameraAnimationManager {
         return keyframes.get(keyframes.size() - 1);
     }
 
-    // Интерполяция позиции камеры
-    private static FreecamPosition interpolatePosition(float time) {
+    // Интерполяция позиции камеры - используем double для time
+    private static FreecamPosition interpolatePosition(double time) {
         if (keyframes.isEmpty()) return null;
 
         // Если время меньше первого кадра
@@ -304,28 +281,28 @@ public class CameraAnimationManager {
             return getCurrentKeyframe().toFreecamPosition();
         }
 
-        // Вычисляем коэффициент интерполяции
-        float t = (time - prevKeyframe.getTime()) / (nextKeyframe.getTime() - prevKeyframe.getTime());
+        // Вычисляем коэффициент интерполяции - используем double
+        double t = (time - prevKeyframe.getTime()) / (nextKeyframe.getTime() - prevKeyframe.getTime());
 
         return interpolate(prevKeyframe, nextKeyframe, t);
     }
 
-    // Интерполяция между двумя ключевыми кадрами
-    private static FreecamPosition interpolate(CameraKeyframe prev, CameraKeyframe next, float t) {
+    // Интерполяция между двумя ключевыми кадрами - используем double для t
+    private static FreecamPosition interpolate(CameraKeyframe prev, CameraKeyframe next, double t) {
         FreecamPosition result = new FreecamPosition();
 
         switch (prev.getInterpolation()) {
             case STEP:
-                if (t < 0.5f) {
+                if (t < 0.5) {
                     result.setX(prev.getX());
                     result.setY(prev.getY());
                     result.setZ(prev.getZ());
-                    result.setRotation(prev.getYaw(), prev.getPitch());
+                    result.setRotation((float) prev.getYaw(), (float) prev.getPitch());
                 } else {
                     result.setX(next.getX());
                     result.setY(next.getY());
                     result.setZ(next.getZ());
-                    result.setRotation(next.getYaw(), next.getPitch());
+                    result.setRotation((float) next.getYaw(), (float) next.getPitch());
                 }
                 break;
 
@@ -334,8 +311,8 @@ public class CameraAnimationManager {
                 result.setY(lerp(prev.getY(), next.getY(), t));
                 result.setZ(lerp(prev.getZ(), next.getZ(), t));
                 result.setRotation(
-                        lerpAngle(prev.getYaw(), next.getYaw(), t),
-                        lerpAngle(prev.getPitch(), next.getPitch(), t)
+                        (float) lerpAngle(prev.getYaw(), next.getYaw(), t),
+                        (float) lerpAngle(prev.getPitch(), next.getPitch(), t)
                 );
                 break;
 
@@ -347,43 +324,43 @@ public class CameraAnimationManager {
         return result;
     }
 
-    // Линейная интерполяция
-    private static double lerp(double a, double b, float t) {
+    // Линейная интерполяция - используем double
+    private static double lerp(double a, double b, double t) {
         return a + (b - a) * t;
     }
 
-    // Интерполяция углов с учетом цикличности
-    private static float lerpAngle(float a, float b, float t) {
-        float diff = b - a;
+    // Интерполяция углов с учетом цикличности - используем double
+    private static double lerpAngle(double a, double b, double t) {
+        double diff = b - a;
         if (diff > 180) diff -= 360;
         if (diff < -180) diff += 360;
         return a + diff * t;
     }
 
-    // Catmull-Rom интерполяция (упрощенная версия)
-    private static FreecamPosition catmullRomInterpolate(CameraKeyframe prev, CameraKeyframe next, float t) {
+    // Catmull-Rom интерполяция (упрощенная версия) - используем double
+    private static FreecamPosition catmullRomInterpolate(CameraKeyframe prev, CameraKeyframe next, double t) {
         // Для упрощения используем сглаженную версию линейной интерполяции
-        float smoothT = t * t * (3.0f - 2.0f * t); // smoothstep
+        double smoothT = t * t * (3.0 - 2.0 * t); // smoothstep
 
         FreecamPosition result = new FreecamPosition();
         result.setX(lerp(prev.getX(), next.getX(), smoothT));
         result.setY(lerp(prev.getY(), next.getY(), smoothT));
         result.setZ(lerp(prev.getZ(), next.getZ(), smoothT));
         result.setRotation(
-                lerpAngle(prev.getYaw(), next.getYaw(), smoothT),
-                lerpAngle(prev.getPitch(), next.getPitch(), smoothT)
+                (float) lerpAngle(prev.getYaw(), next.getYaw(), smoothT),
+                (float) lerpAngle(prev.getPitch(), next.getPitch(), smoothT)
         );
 
         return result;
     }
 
-    // Геттеры для состояния
+    // Геттеры для состояния - возвращаем double
     public static boolean isPlaying() { return isPlaying; }
-    public static float getCurrentTime() { return currentTime; }
+    public static double getCurrentTime() { return currentTime; }
     public static int getKeyframeCount() { return keyframes.size(); }
 
-    public static float getDuration() {
-        if (keyframes.isEmpty()) return 0.0f;
+    public static double getDuration() {
+        if (keyframes.isEmpty()) return 0.0;
         return keyframes.get(keyframes.size() - 1).getTime();
     }
 
@@ -391,5 +368,5 @@ public class CameraAnimationManager {
     public static double getBasePlayerX() { return basePlayerX; }
     public static double getBasePlayerY() { return basePlayerY; }
     public static double getBasePlayerZ() { return basePlayerZ; }
-    public static float getBasePlayerYaw() { return basePlayerYaw; }
+    public static double getBasePlayerYaw() { return basePlayerYaw; }
 }
