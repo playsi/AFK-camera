@@ -7,8 +7,20 @@
   "afkcam.option.modEnabled": "Enable Mod",
   "afkcam.option.modEnabled.desc": "Toggles the AFK Camera mod on or off.",
 
-  "afkcam.option.debugLogEnabled":"Enable Debug Logging" ,
+  "afkcam.option.debugLogEnabled": "Enable Debug Logging",
   "afkcam.option.debugLogEnabled.desc": "Displays system information in console and log files when enabled. Helpful for resourcepack developers.",
+
+  "afkcam.option.activationAfter": "Activate After",
+  "afkcam.option.activationAfter.desc": "Time (in seconds) before the AFK camera activates after inactivity.",
+
+  "afkcam.option.disableOnDamage": "Disable on Damage",
+  "afkcam.option.disableOnDamage.desc": "Stops the AFK camera when the player takes damage.",
+
+  "afkcam.option.disableOnDeath": "Disable on Death",
+  "afkcam.option.disableOnDeath.desc": "Stops the AFK camera when the player dies.",
+
+  "afkcam.option.loadDefaultAnimation": "Load Default Animation",
+  "afkcam.option.loadDefaultAnimation.desc": "Automatically loads the default AFK camera animation when the game starts.",
 
   "afkcam.option.cameraSpeed": "Camera Speed",
   "afkcam.option.cameraSpeed.desc": "Sets the speed at which the camera moves along the route.",
@@ -22,4 +34,3 @@
   "afkcam.option.fadeOut": "Fade Out Duration",
   "afkcam.option.fadeOut.desc": "Time (in seconds) it takes to fade out the camera at the end of a route."
 }
-

@@ -8,15 +8,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CameraKeyframe {
-    private float time; // время в секундах
-    private double x, y, z; // позиция
-    private float yaw, pitch; // вращение в градусах
-    private InterpolationType interpolation; // тип интерполяции
+    private double time;
+    private double x, y, z;
+    private double yaw, pitch;
+    private InterpolationType interpolation;
 
     public enum InterpolationType {
-        STEP,      // без интерполяции
-        LINEAR,    // линейная интерполяция
-        CATMULLROM // плавная кривая
+        STEP,
+        LINEAR,
+        CATMULLROM
     }
 
     public CameraKeyframe(float time, FreecamPosition position, InterpolationType interpolation) {
@@ -34,7 +34,7 @@ public class CameraKeyframe {
         pos.setX(x);
         pos.setY(y);
         pos.setZ(z);
-        pos.setRotation(yaw, pitch);
+        pos.setRotation((float) yaw, (float) pitch);
         return pos;
     }
 }

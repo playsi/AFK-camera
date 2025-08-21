@@ -1,24 +1,36 @@
 {
-  "modmenu.descriptionTranslation.afkcam": "AFKCam — клиентский мод для Minecraft, активирующий кинематографическую камеру при бездействии игрока.",
+  "modmenu.descriptionTranslation.afkcam": "AFK Camera — это клиентский мод для Minecraft, который включает кинематографическую камеру, когда игрок находится в AFK.",
 
   "afkcam.modmenu.title": "Настройки мода AFKCam",
   "afkcam.category.general": "Общие",
 
   "afkcam.option.modEnabled": "Включить мод",
-  "afkcam.option.modEnabled.desc": "Включает или отключает мод AFKCam.",
+  "afkcam.option.modEnabled.desc": "Включает или выключает мод AFK Camera.",
 
-  "afkcam.option.debugLogEnabled":"Включить отладку" ,
-  "afkcam.option.debugLogEnabled.desc": "Если включено, системная информация будет отображаться в консоли и логах (полезно для разработчиков ресурспаков).",
+  "afkcam.option.debugLogEnabled": "Включить отладочный лог",
+  "afkcam.option.debugLogEnabled.desc": "Отображает системную информацию в консоли и логах. Полезно для разработчиков ресурс паков.",
+
+  "afkcam.option.activationAfter": "Активировать через",
+  "afkcam.option.activationAfter.desc": "Время (в секундах) бездействия перед включением камеры AFK.",
+
+  "afkcam.option.disableOnDamage": "Выключать при получении урона",
+  "afkcam.option.disableOnDamage.desc": "Останавливает камеру AFK, если игрок получает урон.",
+
+  "afkcam.option.disableOnDeath": "Выключать при смерти",
+  "afkcam.option.disableOnDeath.desc": "Останавливает камеру AFK, если игрок умирает.",
+
+  "afkcam.option.loadDefaultAnimation": "Загружать анимацию по умолчанию",
+  "afkcam.option.loadDefaultAnimation.desc": "Автоматически загружает стандартную анимацию AFK камеры при запуске игры.",
 
   "afkcam.option.cameraSpeed": "Скорость камеры",
-  "afkcam.option.cameraSpeed.desc": "Определяет скорость движения камеры по маршруту.",
+  "afkcam.option.cameraSpeed.desc": "Задаёт скорость движения камеры по маршруту.",
 
-  "afkcam.option.fade": "Плавные переходы (затухание)",
-  "afkcam.option.fade.desc": "Добавляет плавные затухания между ключевыми кадрами камеры.",
+  "afkcam.option.fade": "Включить плавные переходы",
+  "afkcam.option.fade.desc": "Плавно переключает камеру между ключевыми кадрами для кинематографических переходов.",
 
-  "afkcam.option.fadeIn": "Время появления",
+  "afkcam.option.fadeIn": "Длительность появления",
   "afkcam.option.fadeIn.desc": "Время (в секундах), за которое камера появляется в начале маршрута.",
 
-  "afkcam.option.fadeOut": "Время исчезновения",
+  "afkcam.option.fadeOut": "Длительность исчезновения",
   "afkcam.option.fadeOut.desc": "Время (в секундах), за которое камера исчезает в конце маршрута."
 }

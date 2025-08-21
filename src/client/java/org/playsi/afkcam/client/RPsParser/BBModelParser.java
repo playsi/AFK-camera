@@ -232,7 +232,7 @@ public class BBModelParser {
             }
         }
 
-        LOGGER.warnDebug("Недопустимое значение interpolation: " + value + ". Используется значение по умолчанию: " + defaultInterpolation);
+        LOGGER.warnDebug("Invalid interpolation value: " + value + ". Default value used: " + defaultInterpolation);
 
         return defaultInterpolation;
     }

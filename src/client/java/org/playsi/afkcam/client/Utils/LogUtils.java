@@ -11,7 +11,6 @@ public class LogUtils {
     private final String className;
     private static final Config config = AfkcamClient.getConfig();
 
-    // Constructor that accepts a class object for logging
     public LogUtils(Class<?> clazz) {
         this.logger = LoggerFactory.getLogger(Afkcam.MOD_NAME);
         this.className = clazz.getSimpleName();

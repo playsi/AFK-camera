@@ -29,16 +29,13 @@ public class FreeCamera extends ClientPlayerEntity {
         this.customId = id;
         setId(id);
 
-        // Генерируем уникальный UUID для камеры
         setUuid(UUID.randomUUID());
 
         setPose(EntityPose.SWIMMING);
 
-        // Отключаем гравитацию и физику
         setNoGravity(true);
         noClip = true;
 
-        // Делаем камеру невидимой и неколлизионной
         setInvisible(true);
         setInvulnerable(true);
     }
@@ -90,13 +87,11 @@ public class FreeCamera extends ClientPlayerEntity {
         return moveForwardUntilCollision(position, distance);
     }
 
-    // Same as above, but always check collision.
     private boolean moveForwardUntilCollision(FreecamPosition position, double maxDistance) {
         boolean negative = maxDistance < 0;
         maxDistance = negative ? -1 * maxDistance : maxDistance;
         double increment = 0.1;
 
-        // Move forward by increment until we reach maxDistance or hit a collision
         for (double distance = 0.0; distance < maxDistance; distance += increment) {
             FreecamPosition oldPosition = new FreecamPosition(this);
 
@@ -119,13 +114,11 @@ public class FreeCamera extends ClientPlayerEntity {
 
     public void despawn() {
         if (clientWorld != null) {
-            // Используем наш кастомный ID для удаления
             Entity existingEntity = clientWorld.getEntityById(customId);
             if (existingEntity != null) {
                 clientWorld.removeEntity(customId, RemovalReason.DISCARDED);
             }
 
-            // Также проверяем по UUID на всякий случай
             Entity entityByUuid = clientWorld.getEntity(getUuid());
             if (entityByUuid != null && entityByUuid != existingEntity) {
                 clientWorld.removeEntity(entityByUuid.getId(), RemovalReason.DISCARDED);
@@ -143,51 +136,44 @@ public class FreeCamera extends ClientPlayerEntity {
         super.setPose(EntityPose.SWIMMING);
     }
 
-    // Переопределяем методы физики чтобы камера не падала
     @Override
     public void tick() {
-        // Не вызываем super.tick() чтобы избежать физики
-        // Только базовое обновление без движения и гравитации
         baseTick();
     }
 
     @Override
     public boolean isCollidable() {
-        return false; // Камера не должна иметь коллизию
+        return false;
     }
 
     @Override
     public boolean isPushable() {
-        return false; // Камеру нельзя толкать
+        return false;
     }
 
     @Override
     public boolean canHit() {
-        return false; // С камерой нельзя взаимодействовать
+        return false;
     }
 
     @Override
     public void move(MovementType movementType, Vec3d movement) {
-        // Переопределяем движение - камера движется только когда мы явно устанавливаем позицию
         if (movementType == MovementType.SELF) {
             super.move(movementType, movement);
         }
-        // Игнорируем все остальные типы движения (гравитация, толчки и т.д.)
     }
 
     @Override
     public boolean hasNoGravity() {
-        return true; // Камера не подвержена гравитации
+        return true;
     }
 
     @Override
     public boolean isSpectator() {
-        return true; // Камера работает как спектатор
+        return true;
     }
 
-    // Переопределяем для предотвращения проблем с сетевым взаимодействием
     @Override
     public void updatePositionAndAngles(double x, double y, double z, float yaw, float pitch) {
-        // Игнорируем сетевые обновления позиции
     }
 }

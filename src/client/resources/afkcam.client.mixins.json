@@ -1,9 +1,15 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "org.playsi.afkcam.mixin.client",
+  "package": "org.playsi.afkcam.client.Mixins",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "CameraTransitionMixin",
+    "ClientPlayerInteractionManagerMixin",
+    "GameRendererMixin",
+    "LivingEntityMixin",
+    "MinecraftClientMixin",
+    "WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -8,8 +8,8 @@ import net.fabricmc.api.ModInitializer;
 
 public class Afkcam implements ModInitializer {
 
-    public static final String MOD_NAME = /*$ mod_name*/ "Afk camera";
-    public static final String MOD_ID = /*$ mod_id*/ "afkcam";
+    public static final String MOD_NAME = "Afk camera";
+    public static final String MOD_ID = "afkcam";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_NAME);
 
     public static Identifier id(String path) {

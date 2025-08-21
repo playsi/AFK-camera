@@ -25,20 +25,29 @@ public class Config {
     private boolean debugLogEnabled = false;
 
     @SerialEntry
-    private int activationAfter = 1;
+    private float activationAfter = 30f;
+
+//    @SerialEntry
+//    private double cameraSpeed = 1.0;
 
     @SerialEntry
-    private double cameraSpeed = 1.0;
+    private boolean disableOnDamage = true;
 
     @SerialEntry
-    private boolean cameraFollow = false;
+    private boolean disableOnDeath = true;
 
     @SerialEntry
-    private boolean fade = true;
+    private boolean loadDefaultAnimation = true;
 
     @SerialEntry
-    private int fadeIn = 1;
+   private boolean cameraFollow = false;
 
-    @SerialEntry
-    private int fadeOut = 1;
+//    @SerialEntry
+//    private boolean fade = true;
+//
+//    @SerialEntry
+//    private int fadeIn = 1;
+//
+//    @SerialEntry
+//    private int fadeOut = 1;
 }

@@ -13,8 +13,6 @@ import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.arg
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 import static org.playsi.afkcam.client.Camera.FreeCamManager.freecamToggle;
 
-
-
 public class CinematicCameraCommands {
 
     public static void register() {
@@ -41,35 +39,35 @@ public class CinematicCameraCommands {
                                 List<ParsedAnimation> animations = CinematicCameraResourceReloadListener.getCachedAnimations();
                                 for (ParsedAnimation anim : animations) {
                                     if (anim.getName().equals(name)) {
-                                        ctx.getSource().sendFeedback(Text.literal("Анимация: " + anim.getName()));
+                                        ctx.getSource().sendFeedback(Text.literal("Animation: " + anim.getName()));
                                         for (ParsedAnimation.Keyframe kf : anim.getPositionKeyframes()) {
-                                            ctx.getSource().sendFeedback(Text.literal(String.format("Время: %.2f, Позиция: [%.2f, %.2f, %.2f], Интерполяция: %s",
+                                            ctx.getSource().sendFeedback(Text.literal(String.format("Time: %.2f, Position: [%.2f, %.2f, %.2f], Interpolation: %s",
                                                     kf.getTime(), kf.getValues()[0], kf.getValues()[1], kf.getValues()[2], kf.getInterpolation())));
                                         }
                                         for (ParsedAnimation.Keyframe kf : anim.getRotationKeyframes()) {
-                                            ctx.getSource().sendFeedback(Text.literal(String.format("Время: %.2f, Поворот: [%.2f, %.2f, %.2f], Интерполяция: %s",
+                                            ctx.getSource().sendFeedback(Text.literal(String.format("Time: %.2f, Rotation: [%.2f, %.2f, %.2f], Interpolation: %s",
                                                     kf.getTime(), kf.getValues()[0], kf.getValues()[1], kf.getValues()[2], kf.getInterpolation())));
                                         }
                                         return 1;
                                     }
                                 }
-                                ctx.getSource().sendFeedback(Text.literal("Анимация не найдена: " + name));
+                                ctx.getSource().sendFeedback(Text.literal("Animation not found: " + name));
                                 return 0;
                             })
                     )
                     .executes(ctx -> {
                         List<ParsedAnimation> animations = CinematicCameraResourceReloadListener.getCachedAnimations();
                         if (animations.isEmpty()) {
-                            ctx.getSource().sendFeedback(Text.literal("Анимации не найдены."));
+                            ctx.getSource().sendFeedback(Text.literal("No animations found."));
                         } else {
                             for (ParsedAnimation anim : animations) {
-                                ctx.getSource().sendFeedback(Text.literal("Анимация: " + anim.getName()));
+                                ctx.getSource().sendFeedback(Text.literal("Animation: " + anim.getName()));
                                 for (ParsedAnimation.Keyframe kf : anim.getPositionKeyframes()) {
-                                    ctx.getSource().sendFeedback(Text.literal(String.format("Время: %.2f, Позиция: [%.2f, %.2f, %.2f], Интерполяция: %s",
+                                    ctx.getSource().sendFeedback(Text.literal(String.format("Time: %.2f, Position: [%.2f, %.2f, %.2f], Interpolation: %s",
                                             kf.getTime(), kf.getValues()[0], kf.getValues()[1], kf.getValues()[2], kf.getInterpolation())));
                                 }
                                 for (ParsedAnimation.Keyframe kf : anim.getRotationKeyframes()) {
-                                    ctx.getSource().sendFeedback(Text.literal(String.format("Время: %.2f, Поворот: [%.2f, %.2f, %.2f], Интерполяция: %s",
+                                    ctx.getSource().sendFeedback(Text.literal(String.format("Time: %.2f, Rotation: [%.2f, %.2f, %.2f], Interpolation: %s",
                                             kf.getTime(), kf.getValues()[0], kf.getValues()[1], kf.getValues()[2], kf.getInterpolation())));
                                 }
                             }

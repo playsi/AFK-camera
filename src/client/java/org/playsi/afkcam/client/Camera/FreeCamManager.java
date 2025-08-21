@@ -46,7 +46,6 @@ public class FreeCamManager {
         return MC.player != null && MC.world != null && !MC.isPaused();
     }
 
-    // Методы для внешнего управления камерой
     public static void teleportFreecam(double x, double y, double z) {
         if (freeCamera != null) {
             freeCamera.applyPosition(x, y, z, freeCamera.getYaw(), freeCamera.getPitch());
@@ -72,8 +71,7 @@ public class FreeCamManager {
 
     public static void onDisconnect() {
         if (isEnabled()) {
-            // Принудительно отключаем камеру при отключении от сервера
-            freecamEnabled = true; // Устанавливаем true чтобы freecamToggle() корректно отработал
+            freecamEnabled = true;
             freecamToggle();
         }
     }
@@ -105,12 +103,10 @@ public class FreeCamManager {
 
         onEnable();
 
-        // Создаем камеру с уникальным ID
         freeCamera = new FreeCamera(FREECAM_ENTITY_ID);
         moveToPlayer();
         freeCamera.spawn();
 
-        // Устанавливаем камеру как активную
         MC.setCameraEntity(freeCamera);
 
         LOGGER.infoDebug("Freecam enabled");
@@ -119,12 +115,10 @@ public class FreeCamManager {
     private static void onDisableFreecam() {
         LOGGER.infoDebug("Disabling freecam");
 
-        // Сначала возвращаем камеру на игрока
         if (MC.player != null) {
             MC.setCameraEntity(MC.player);
         }
 
-        // Затем очищаем freecam
         if (freeCamera != null) {
             freeCamera.despawn();
             freeCamera = null;
@@ -146,7 +140,6 @@ public class FreeCamManager {
         MC.chunkCullingEnabled = true;
         MC.gameRenderer.setRenderHand(true);
 
-        // Восстанавливаем сохраненную перспективу
         if (rememberedPerspective != null) {
             MC.options.setPerspective(rememberedPerspective);
         }
