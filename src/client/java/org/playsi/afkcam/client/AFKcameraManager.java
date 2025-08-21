@@ -118,8 +118,7 @@ public class AFKcameraManager {
                 MC.options.useKey.isPressed()               ||
                 MC.options.attackKey.isPressed()            ||
                 MC.options.playerListKey.isPressed()        ||
-                MC.options.togglePerspectiveKey.isPressed() ||
-                !MC.options.hudHidden;
+                MC.options.togglePerspectiveKey.isPressed() ;
     }
 
     private static boolean isInWorld() {
