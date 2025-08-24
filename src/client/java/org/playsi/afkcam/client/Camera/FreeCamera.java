@@ -15,6 +15,13 @@ public class FreeCamera extends ClientPlayerEntity {
     private static final MinecraftClient MC = MinecraftClient.getInstance();
     private final int customId;
 
+    private boolean suppressPositionUpdates = false;
+    private double lastAppliedX = Double.NaN;
+    private double lastAppliedY = Double.NaN;
+    private double lastAppliedZ = Double.NaN;
+    private float lastAppliedYaw = Float.NaN;
+    private float lastAppliedPitch = Float.NaN;
+
     public FreeCamera(int id) {
         super(
                 MC,
@@ -48,14 +55,36 @@ public class FreeCamera extends ClientPlayerEntity {
 
     public void applyPosition(FreecamPosition position) {
         if (position != null) {
-            setPosition(position.getX(), position.getY(), position.getZ());
-            setAngles(position.getYaw(), position.getPitch());
+            applyPosition(position.getX(), position.getY(), position.getZ(),
+                    position.getYaw(), position.getPitch());
         }
     }
 
     public void applyPosition(double x, double y, double z, float yaw, float pitch) {
-        setPosition(x, y, z);
-        setAngles(yaw, pitch);
+        boolean positionChanged =
+                Double.isNaN(lastAppliedX) || Math.abs(lastAppliedX - x) > 0.0001 ||
+                        Double.isNaN(lastAppliedY) || Math.abs(lastAppliedY - y) > 0.0001 ||
+                        Double.isNaN(lastAppliedZ) || Math.abs(lastAppliedZ - z) > 0.0001 ||
+                        Float.isNaN(lastAppliedYaw) || Math.abs(lastAppliedYaw - yaw) > 0.01f ||
+                        Float.isNaN(lastAppliedPitch) || Math.abs(lastAppliedPitch - pitch) > 0.01f;
+
+        if (!positionChanged) {
+            return;
+        }
+
+        suppressPositionUpdates = true;
+        try {
+            refreshPositionAndAngles(x, y, z, yaw, pitch);
+
+            lastAppliedX = x;
+            lastAppliedY = y;
+            lastAppliedZ = z;
+            lastAppliedYaw = yaw;
+            lastAppliedPitch = pitch;
+
+        } finally {
+            suppressPositionUpdates = false;
+        }
     }
 
     // Mutate the position and rotation based on perspective
@@ -138,7 +167,9 @@ public class FreeCamera extends ClientPlayerEntity {
 
     @Override
     public void tick() {
-        baseTick();
+        if (!suppressPositionUpdates) {
+            baseTick();
+        }
     }
 
     @Override
@@ -158,7 +189,8 @@ public class FreeCamera extends ClientPlayerEntity {
 
     @Override
     public void move(MovementType movementType, Vec3d movement) {
-        if (movementType == MovementType.SELF) {
+        // Блокируем все движения, кроме принудительных
+        if (!suppressPositionUpdates && movementType == MovementType.SELF) {
             super.move(movementType, movement);
         }
     }
@@ -175,5 +207,21 @@ public class FreeCamera extends ClientPlayerEntity {
 
     @Override
     public void updatePositionAndAngles(double x, double y, double z, float yaw, float pitch) {
+
+        if (!suppressPositionUpdates) {
+            super.updatePositionAndAngles(x, y, z, yaw, pitch);
+        }
+    }
+
+    public void forceUpdatePosition(double x, double y, double z, float yaw, float pitch) {
+        super.updatePositionAndAngles(x, y, z, yaw, pitch);
+    }
+
+    public void resetPositionCache() {
+        lastAppliedX = Double.NaN;
+        lastAppliedY = Double.NaN;
+        lastAppliedZ = Double.NaN;
+        lastAppliedYaw = Float.NaN;
+        lastAppliedPitch = Float.NaN;
     }
 }

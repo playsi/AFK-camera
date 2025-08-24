@@ -38,7 +38,6 @@ public class AFKcameraManager {
 
     private static long lastActivityTime = System.currentTimeMillis();
     private static boolean wasHudHidden = false;
-    private static boolean wasInMenu = false;
 
     private static double prevMouseX;
     private static double prevMouseY;

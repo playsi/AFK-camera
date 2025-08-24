@@ -1,6 +1,5 @@
 package org.playsi.afkcam.client.Camera;
 
-
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.entity.Entity;
@@ -28,7 +27,15 @@ public class FreecamPosition {
         this.z = entity.getZ();
         setRotation(entity.getYaw(), entity.getPitch());
     }
-    public FreecamPosition(){
+
+    public FreecamPosition() {
+    }
+
+    public FreecamPosition(FreecamPosition other) {
+        this.x = other.x;
+        this.y = other.y;
+        this.z = other.z;
+        setRotation(other.yaw, other.pitch);
     }
 
     // From net.minecraft.client.render.Camera.setRotation
@@ -46,7 +53,6 @@ public class FreecamPosition {
         up.set(0.0f, 1.0f, 0.0f).rotate(rotation);
         right.set(1.0f, 0.0f, 0.0f).rotate(rotation);
     }
-
 
     // Invert the rotation so that it is mirrored
     // As-per net.minecraft.client.render.Camera.update
@@ -75,6 +81,26 @@ public class FreecamPosition {
         return new Vector3f((float) x, (float) y, (float) z);
     }
 
+    public FreecamPosition copy() {
+        return new FreecamPosition(this);
+    }
+
+    public void setPosition(double x, double y, double z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    // Метод для проверки равенства позиций (для оптимизации)
+    public boolean positionEquals(FreecamPosition other, double epsilon) {
+        if (other == null) return false;
+        return Math.abs(this.x - other.x) < epsilon &&
+                Math.abs(this.y - other.y) < epsilon &&
+                Math.abs(this.z - other.z) < epsilon &&
+                Math.abs(this.yaw - other.yaw) < epsilon &&
+                Math.abs(this.pitch - other.pitch) < epsilon;
+    }
+
     @Override
     public String toString() {
         return String.format("FreecamPosition[x=%.2f, y=%.2f, z=%.2f, yaw=%.2f, pitch=%.2f]", x, y, z, yaw, pitch);
@@ -86,5 +112,4 @@ public class FreecamPosition {
         }
         return entity.getY() - entity.getEyeHeight(EntityPose.SWIMMING) + entity.getEyeHeight(entity.getPose());
     }
-
 }
