@@ -2,7 +2,7 @@ package org.playsi.afkcam.client.Mixins;
 
 
 import net.minecraft.client.MinecraftClient;
-import org.playsi.afkcam.client.AFKcameraManager;
+import org.playsi.afkcam.client.AFKmode.AFKcameraManager;
 import org.spongepowered.asm.mixin.Mixin;
 
 import org.spongepowered.asm.mixin.injection.At;

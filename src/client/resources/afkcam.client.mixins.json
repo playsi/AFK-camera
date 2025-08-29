@@ -7,7 +7,6 @@
     "CameraTransitionMixin",
     "ClientPlayerInteractionManagerMixin",
     "GameRendererMixin",
-    "LivingEntityMixin",
     "MinecraftClientMixin",
     "WorldRendererMixin"
   ],

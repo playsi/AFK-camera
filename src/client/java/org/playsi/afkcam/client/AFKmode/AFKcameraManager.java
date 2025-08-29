@@ -1,14 +1,14 @@
-package org.playsi.afkcam.client;
+package org.playsi.afkcam.client.AFKmode;
 
 import lombok.Getter;
-import lombok.Setter;
 import net.minecraft.client.MinecraftClient;
+import org.playsi.afkcam.client.AfkcamClient;
+import org.playsi.afkcam.client.AnimationsLogic.AnimationService;
 import org.playsi.afkcam.client.Camera.CameraAnimationManager;
 import org.playsi.afkcam.client.Camera.CameraKeyframe;
 import org.playsi.afkcam.client.Camera.FreeCamManager;
-import org.playsi.afkcam.client.RPsParser.CinematicCameraResourceReloadListener;
 import org.playsi.afkcam.client.Utils.LogUtils;
-import org.playsi.afkcam.client.Utils.ParsedAnimation;
+import org.playsi.afkcam.client.AnimationsLogic.Parser.RawAnimation;
 import org.playsi.afkcam.client.config.Config;
 
 import java.util.*;
@@ -23,26 +23,15 @@ public class AFKcameraManager {
     private static final Config CONFIG = AfkcamClient.getConfig();
     private static final LogUtils LOGGER = new LogUtils(AFKcameraManager.class);
 
-//    private static final long AFK_TIMEOUT_MS = 5 * 60 * 1000 ; // 5 минут в миллисекундах
-//    private static final float FADE_IN_DURATION = 0.5f; // Длительность затухания в секундах
-//    private static final float FADE_OUT_DURATION = 0.5f;
-//    private static final float MIN_ANIMATION_DURATION = FADE_IN_DURATION + FADE_OUT_DURATION + 1.0f; // Минимальная длительность анимации (1с + 2*0.5с затухание)
-
     private static final float SCALE_FACTOR = 1.0f / 16.0f;
 
     @Getter
     private static boolean isAfkModeActive = false;
 
-    @Setter
-    private static boolean playerTakeDamage = false;
-
     private static long lastActivityTime = System.currentTimeMillis();
-    private static boolean wasHudHidden = false;
 
-    private static double prevMouseX;
-    private static double prevMouseY;
 
-    private static List<ParsedAnimation> availableAnimations = new ArrayList<>();
+    private static List<RawAnimation> availableAnimations = new ArrayList<>();
     private static int currentAnimationIndex = 0;
     private static Random animationRandom = new Random();
 
@@ -54,10 +43,9 @@ public class AFKcameraManager {
     if (CONFIG.isModEnabled() || !isInWorld()) {
             if (!isAfkModeActive && shouldActivateAfkMode()) {
                 activateAfkMode();
-            } else if (isAfkModeActive && hasPlayerActivity()) {
+            } else if (isAfkModeActive && !AFKConditions.hasAFKConditions()) {
                 deactivateAfkMode();
             }
-
             if (isAfkModeActive) {
                 tickAfkMode();
             }
@@ -67,9 +55,7 @@ public class AFKcameraManager {
         }
     }
 
-    /**
-     * Рендер метод - вызывать каждый кадр
-     */
+
     public static void onRender(float tickDelta) {
 //        fadeManager.render(tickDelta);
 
@@ -84,41 +70,14 @@ public class AFKcameraManager {
     private static boolean shouldActivateAfkMode() {
         if (!isInWorld()) return false;
         if (isAfkModeActive) return false;
-        if (hasPlayerActivity()){
+        if (!AFKConditions.hasAFKConditions()){
             lastActivityTime = System.currentTimeMillis();
         }
         long timeSinceActivity = System.currentTimeMillis() - lastActivityTime;
         return timeSinceActivity >= (long) CONFIG.getActivationAfter() * 1000L;
     }
 
-    private static boolean hasPlayerActivity() {
-        if (playerTakeDamage) {
-            playerTakeDamage = false;
-            return true;
-        }
 
-        if (CONFIG.isDisableOnDeath() && MC.player.isDead()) {
-            return true;
-        }
-
-        if (prevMouseX != MC.mouse.getX() || prevMouseY != MC.mouse.getY()){
-            prevMouseX = MC.mouse.getX();
-            prevMouseY = MC.mouse.getY();
-            return true;
-        }
-        return  MC.options.forwardKey.isPressed()           ||
-                MC.options.backKey.isPressed()              ||
-                MC.options.rightKey.isPressed()             ||
-                MC.options.leftKey.isPressed()              ||
-                MC.options.inventoryKey.isPressed()         ||
-                MC.options.sprintKey.isPressed()            ||
-                MC.options.jumpKey.isPressed()              ||
-                MC.options.sneakKey.isPressed()             ||
-                MC.options.useKey.isPressed()               ||
-                MC.options.attackKey.isPressed()            ||
-                MC.options.playerListKey.isPressed()        ||
-                MC.options.togglePerspectiveKey.isPressed() ;
-    }
 
     private static boolean isInWorld() {
         return MC.world != null && MC.player != null && !MC.isPaused();
@@ -147,7 +106,7 @@ public class AFKcameraManager {
 //            startNextAnimation();
 //        }else{
             //fadeManager.startFadeOut(() -> {
-            hidePlayerHud();
+            HudManager.hidePlayerHud();
             startNextAnimation();
             //});
 //        }
@@ -161,7 +120,7 @@ public class AFKcameraManager {
 
         isAfkModeActive = false;
         CameraAnimationManager.stopPlayback();
-        restorePlayerHud();
+        HudManager.restorePlayerHud();
         //fadeManager.startFadeOut(() -> {
             if (FreeCamManager.isEnabled()) {
                 FreeCamManager.freecamToggle();
@@ -173,9 +132,6 @@ public class AFKcameraManager {
         //});
     }
 
-    /**
-     * Тик AFK режима
-     */
     private static void tickAfkMode() {
         if (!CameraAnimationManager.isPlaying()) {
             startNextAnimation();
@@ -185,7 +141,7 @@ public class AFKcameraManager {
     private static void loadAvailableAnimations() {
         availableAnimations.clear();
 
-        List<ParsedAnimation> allAnimations = CinematicCameraResourceReloadListener.getCachedAnimations();
+        //List<RawAnimation> allAnimations = AFKcamResourceReloadListener.getCachedAnimations();
         currentAnimationIndex = 0;
 // for feature
 //        for (ParsedAnimation animation : allAnimations) {
@@ -197,7 +153,7 @@ public class AFKcameraManager {
 //            }
 //        }
 
-        availableAnimations = new ArrayList<>(allAnimations);
+        availableAnimations = new ArrayList<>(AnimationService.getInstance().getAllAnimations());
         LOGGER.infoDebug("Загружено " + availableAnimations.size() + " доступных анимаций");
 
         Collections.shuffle(availableAnimations, animationRandom);
@@ -213,7 +169,7 @@ public class AFKcameraManager {
             return;
         }
 
-        ParsedAnimation nextAnimation = availableAnimations.get(currentAnimationIndex);
+        RawAnimation nextAnimation = availableAnimations.get(currentAnimationIndex);
         currentAnimationIndex = (currentAnimationIndex + 1) % availableAnimations.size();
 
         if (currentAnimationIndex == 0) {
@@ -234,18 +190,18 @@ public class AFKcameraManager {
     /**
      * Конвертация ParsedAnimation в формат CameraAnimationManager
      */
-    private static void convertAndLoadAnimation(ParsedAnimation animation) {
+    private static void convertAndLoadAnimation(RawAnimation animation) {
         CameraAnimationManager.clearKeyframes();
 
-        List<ParsedAnimation.Keyframe> posFrames = animation.getPositionKeyframes();
-        List<ParsedAnimation.Keyframe> rotFrames = animation.getRotationKeyframes();
+        List<RawAnimation.Keyframe> posFrames = animation.getPositionKeyframes();
+        List<RawAnimation.Keyframe> rotFrames = animation.getRotationKeyframes();
 
-        Map<Float, ParsedAnimation.Keyframe> rotationMap = new HashMap<>();
-        for (ParsedAnimation.Keyframe rotFrame : rotFrames) {
+        Map<Float, RawAnimation.Keyframe> rotationMap = new HashMap<>();
+        for (RawAnimation.Keyframe rotFrame : rotFrames) {
             rotationMap.put(rotFrame.getTime(), rotFrame);
         }
 
-        for (ParsedAnimation.Keyframe posFrame : posFrames) {
+        for (RawAnimation.Keyframe posFrame : posFrames) {
             float time = posFrame.getTime();
             float[] position = posFrame.getValues();
 
@@ -261,7 +217,7 @@ public class AFKcameraManager {
             );
         }
 
-        for (ParsedAnimation.Keyframe rotFrame : rotFrames) {
+        for (RawAnimation.Keyframe rotFrame : rotFrames) {
             float time = rotFrame.getTime();
             if (posFrames.stream().noneMatch(pf -> Math.abs(pf.getTime() - time) < 0.001f)) {
                 float[] position = findOrInterpolatePosition(posFrames, time);
@@ -277,19 +233,19 @@ public class AFKcameraManager {
         }
     }
 
-    private static float[] findOrInterpolateRotation(List<ParsedAnimation.Keyframe> rotFrames, float time) {
+    private static float[] findOrInterpolateRotation(List<RawAnimation.Keyframe> rotFrames, float time) {
         if (rotFrames.isEmpty()) return new float[]{0, 0};
 
-        for (ParsedAnimation.Keyframe frame : rotFrames) {
+        for (RawAnimation.Keyframe frame : rotFrames) {
             if (Math.abs(frame.getTime() - time) < 0.001f) {
                 return frame.getValues();
             }
         }
 
-        ParsedAnimation.Keyframe prevFrame = null;
-        ParsedAnimation.Keyframe nextFrame = null;
+        RawAnimation.Keyframe prevFrame = null;
+        RawAnimation.Keyframe nextFrame = null;
 
-        for (ParsedAnimation.Keyframe frame : rotFrames) {
+        for (RawAnimation.Keyframe frame : rotFrames) {
             if (frame.getTime() <= time) {
                 prevFrame = frame;
             } else if (nextFrame == null) {
@@ -311,10 +267,10 @@ public class AFKcameraManager {
         };
     }
 
-    private static float[] findOrInterpolatePosition(List<ParsedAnimation.Keyframe> posFrames, float time) {
+    private static float[] findOrInterpolatePosition(List<RawAnimation.Keyframe> posFrames, float time) {
         if (posFrames.isEmpty()) return new float[]{0, 0, 0};
 
-        for (ParsedAnimation.Keyframe frame : posFrames) {
+        for (RawAnimation.Keyframe frame : posFrames) {
             if (Math.abs(frame.getTime() - time) < 0.001f) {
                 float[] values = frame.getValues();
                 return new float[]{
@@ -325,10 +281,10 @@ public class AFKcameraManager {
             }
         }
 
-        ParsedAnimation.Keyframe prevFrame = null;
-        ParsedAnimation.Keyframe nextFrame = null;
+        RawAnimation.Keyframe prevFrame = null;
+        RawAnimation.Keyframe nextFrame = null;
 
-        for (ParsedAnimation.Keyframe frame : posFrames) {
+        for (RawAnimation.Keyframe frame : posFrames) {
             if (frame.getTime() <= time) {
                 prevFrame = frame;
             } else if (nextFrame == null) {
@@ -364,18 +320,6 @@ public class AFKcameraManager {
                 (prevPos[1] + (nextPos[1] - prevPos[1]) * t) * SCALE_FACTOR,
                 (prevPos[2] + (nextPos[2] - prevPos[2]) * t) * SCALE_FACTOR
         };
-    }
-
-    private static void hidePlayerHud() {
-        if (MC.options != null) {
-            wasHudHidden = MC.options.hudHidden;
-            MC.options.hudHidden = true;
-        }
-    }
-    private static void restorePlayerHud() {
-        if (MC.options != null) {
-            MC.options.hudHidden = wasHudHidden;
-        }
     }
 
     public static void onDisconnect() {

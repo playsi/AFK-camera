@@ -1,4 +1,4 @@
-package org.playsi.afkcam.client.Utils;
+package org.playsi.afkcam.client.AnimationsLogic.Parser;
 
 import com.google.gson.JsonElement;
 import lombok.Getter;
@@ -10,12 +10,12 @@ import java.util.List;
  * Holds camera animation keyframes.
  */
 @Getter
-public class ParsedAnimation {
+public class RawAnimation {
     private final String name;
     private final List<Keyframe> positionKeyframes = new ArrayList<>();
     private final List<Keyframe> rotationKeyframes = new ArrayList<>();
 
-    public ParsedAnimation(String name) {
+    public RawAnimation(String name) {
         this.name = name;
     }
 
@@ -45,7 +45,7 @@ public class ParsedAnimation {
         rotationKeyframes.add(new Keyframe(time, new float[]{x, y, z}, interp));
     }
 
-    /**
+    /**\
      * Represents a single keyframe in an animation.
      */
     @Getter

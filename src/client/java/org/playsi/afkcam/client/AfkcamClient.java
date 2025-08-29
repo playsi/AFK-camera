@@ -7,8 +7,9 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.MinecraftClient;
+import org.playsi.afkcam.client.AFKmode.AFKcameraManager;
 import org.playsi.afkcam.client.Camera.FreeCamManager;
-import org.playsi.afkcam.client.RPsParser.CinematicCameraResourceReloadListener;
+import org.playsi.afkcam.client.RPsParser.AFKcamResourceReloadListener;
 import org.playsi.afkcam.client.config.Config;
 
 public class AfkcamClient implements ClientModInitializer {
@@ -26,13 +27,11 @@ public class AfkcamClient implements ClientModInitializer {
 
         registerEvents();
 
-        CinematicCameraResourceReloadListener.register();
-        CinematicCameraCommands.register();
+        AFKcamResourceReloadListener.register();
+        AFKcamCommands.register();
 
     }
     private void registerEvents() {
-
-        ClientTickEvents.START_CLIENT_TICK.register(FreeCamManager::preTick);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             AFKcameraManager.tick();

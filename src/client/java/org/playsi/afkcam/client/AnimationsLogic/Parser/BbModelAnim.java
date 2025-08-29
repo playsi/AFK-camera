@@ -1,23 +1,22 @@
-package org.playsi.afkcam.client.RPsParser;
+package org.playsi.afkcam.client.AnimationsLogic.Parser;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.playsi.afkcam.client.Utils.ParsedAnimation;
 import org.playsi.afkcam.client.Utils.LogUtils;
 import java.io.BufferedReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import static org.playsi.afkcam.client.Utils.ParsedAnimation.parseFloatValue;
+import static org.playsi.afkcam.client.AnimationsLogic.Parser.RawAnimation.parseFloatValue;
 
 /**
  * Parser for BBModel files to extract camera animations.
  */
-public class BBModelParser {
-    private static final LogUtils LOGGER = new LogUtils(BBModelParser.class);
+public class BbModelAnim {
+    private static final LogUtils LOGGER = new LogUtils(BbModelAnim.class);
     private static final Set<String> ALLOWED_VALUES = Set.of("step", "linear", "catmullrom");
     /**
      * Parse camera animations from a JSON reader.
@@ -25,8 +24,8 @@ public class BBModelParser {
      * @param reader The reader containing JSON data
      * @return List of parsed camera animations
      */
-    public static List<ParsedAnimation> parseAnimationsFromJson(BufferedReader reader) {
-        List<ParsedAnimation> animations = new ArrayList<>();
+    public static List<RawAnimation> parseAnimationsFromJson(BufferedReader reader) {
+        List<RawAnimation> animations = new ArrayList<>();
         JsonElement root = JsonParser.parseReader(reader);
 
         if (!root.isJsonObject()) {
@@ -50,13 +49,13 @@ public class BBModelParser {
         LOGGER.info("Found " + animArray.size() + " animation entries to process");
 
         // Check for any animation data first
-        if (animArray.size() == 0) {
+        if (animArray.isEmpty()) {
             LOGGER.warnDebug("Animations array is empty!");
             return animations;
         }
 
         // Try to get the structure of the first animation for debugging
-        if (animArray.size() > 0 && animArray.get(0).isJsonObject()) {
+        if (!animArray.isEmpty() && animArray.get(0).isJsonObject()) {
             JsonObject firstAnim = animArray.get(0).getAsJsonObject();
             LOGGER.infoDebug("First animation properties: " + firstAnim.keySet());
 
@@ -90,7 +89,7 @@ public class BBModelParser {
      * @param animArray The JSON array containing animation data
      * @param animations The list to add parsed animations to
      */
-    private static void parseAnimationsFromArray(JsonArray animArray, List<ParsedAnimation> animations) {
+    private static void parseAnimationsFromArray(JsonArray animArray, List<RawAnimation> animations) {
         for (JsonElement animEl : animArray) {
             if (!animEl.isJsonObject()) continue;
 
@@ -138,7 +137,7 @@ public class BBModelParser {
                 foundCameraAnimator = true;
 
                 // Create camera animation object
-                ParsedAnimation camAnim = new ParsedAnimation(animationName);
+                RawAnimation camAnim = new RawAnimation(animationName);
 
                 // Check for keyframes
                 if (!animatorObj.has("keyframes")) {
@@ -178,7 +177,7 @@ public class BBModelParser {
      * @param camAnim The camera animation to add keyframes to
      * @param animationName The name of the animation (for logging)
      */
-    private static void parseKeyframes(JsonArray keys, ParsedAnimation camAnim, String animationName) {
+    private static void parseKeyframes(JsonArray keys, RawAnimation camAnim, String animationName) {
         for (JsonElement keyEl : keys) {
             if (!keyEl.isJsonObject()) continue;
 
@@ -189,7 +188,7 @@ public class BBModelParser {
 
             if ("position".equals(channel) && keyObj.has("data_points")) {
                 JsonElement dataPointsElem = keyObj.get("data_points");
-                if (dataPointsElem.isJsonArray() && dataPointsElem.getAsJsonArray().size() > 0) {
+                if (dataPointsElem.isJsonArray() && !dataPointsElem.getAsJsonArray().isEmpty()) {
                     JsonObject dataPoint = dataPointsElem.getAsJsonArray().get(0).getAsJsonObject();
 
                     if (dataPoint.has("x") && dataPoint.has("y") && dataPoint.has("z")) {
@@ -205,7 +204,7 @@ public class BBModelParser {
 
             if ("rotation".equals(channel) && keyObj.has("data_points")) {
                 JsonElement dataPointsElem = keyObj.get("data_points");
-                if (dataPointsElem.isJsonArray() && dataPointsElem.getAsJsonArray().size() > 0) {
+                if (dataPointsElem.isJsonArray() && !dataPointsElem.getAsJsonArray().isEmpty()) {
                     JsonObject dataPoint = dataPointsElem.getAsJsonArray().get(0).getAsJsonObject();
 
                     if (dataPoint.has("x") && dataPoint.has("y") && dataPoint.has("z")) {

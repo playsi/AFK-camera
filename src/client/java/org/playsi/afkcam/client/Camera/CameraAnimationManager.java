@@ -134,13 +134,11 @@ public class CameraAnimationManager {
         updateCameraPosition();
     }
 
-    // ГЛАВНОЕ ИЗМЕНЕНИЕ: Используем только один метод обновления
     public static void onRender(float tickDelta) {
         if (!isPlaying || keyframes.isEmpty() || FreeCamManager.getFreeCamera() == null || MC.player == null) {
             return;
         }
 
-        // Точный расчет времени на основе реального времени
         long currentNanoTime = System.nanoTime();
         if (lastUpdateTime > 0) {
             double realDeltaTime = (currentNanoTime - lastUpdateTime) / 1_000_000_000.0;
@@ -156,12 +154,6 @@ public class CameraAnimationManager {
         }
 
         updateCameraPosition();
-    }
-
-    // Убираем tick() или делаем его пустым
-    public static void tick() {
-        // Больше не обновляем позицию здесь, только в onRender
-        // Это устраняет двойное обновление
     }
 
     private static void updateCameraPosition() {

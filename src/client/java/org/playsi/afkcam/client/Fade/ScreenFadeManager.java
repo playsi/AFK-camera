@@ -8,6 +8,12 @@
 //import net.minecraft.util.math.MathHelper;
 //import org.lwjgl.opengl.GL11;
 //
+
+//    private static final long AFK_TIMEOUT_MS = 5 * 60 * 1000 ; // 5 минут в миллисекундах
+//    private static final float FADE_IN_DURATION = 0.5f; // Длительность затухания в секундах
+//    private static final float FADE_OUT_DURATION = 0.5f;
+//    private static final float MIN_ANIMATION_DURATION = FADE_IN_DURATION + FADE_OUT_DURATION + 1.0f; // Минимальная длительность анимации (1с + 2*0.5с затухание)
+
 ///**
 // * Управляет плавным затуханием и проявлением экрана для AFK-камеры
 // */

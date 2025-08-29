@@ -8,7 +8,7 @@
 //import net.minecraft.world.World;
 //import org.playsi.afkcam.client.AfkcamClient;
 //import org.playsi.afkcam.client.Utils.LogUtils;
-//import org.playsi.afkcam.client.Utils.ParsedAnimation;
+//import org.playsi.afkcam.client.AnimationsLogic.Parser.ParsedAnimation;
 //
 //import java.util.ArrayList;
 //import java.util.List;
