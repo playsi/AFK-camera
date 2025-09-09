@@ -65,7 +65,7 @@ public class FreeCamManager {
         disableNextTick = false;
 
         if (isEnabled()) {
-            mc.gameRenderer.setRenderHand(false);
+//            mc.gameRenderer.setRenderHand(false);
         }
     }
 
@@ -130,7 +130,7 @@ public class FreeCamManager {
 
     private static void onEnable() {
         MC.chunkCullingEnabled = false;
-        MC.gameRenderer.setRenderHand(false);
+//        MC.gameRenderer.setRenderHand(false);
 
         rememberedPerspective = MC.options.getPerspective();
         MC.options.setPerspective(Perspective.FIRST_PERSON);
@@ -138,7 +138,7 @@ public class FreeCamManager {
 
     private static void onDisable() {
         MC.chunkCullingEnabled = true;
-        MC.gameRenderer.setRenderHand(true);
+//        MC.gameRenderer.setRenderHand(true);
 
         if (rememberedPerspective != null) {
             MC.options.setPerspective(rememberedPerspective);

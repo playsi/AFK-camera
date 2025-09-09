@@ -6,6 +6,7 @@ import net.minecraft.client.option.Perspective;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.MovementType;
+import net.minecraft.util.PlayerInput;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.Objects;
@@ -29,7 +30,7 @@ public class FreeCamera extends ClientPlayerEntity {
                 Objects.requireNonNull(MC.getNetworkHandler()),
                 MC.player != null ? MC.player.getStatHandler() : null,
                 MC.player != null ? MC.player.getRecipeBook() : null,
-                false,
+                new PlayerInput(false, false, false, false, false, false, false),
                 false
         );
 
@@ -172,10 +173,10 @@ public class FreeCamera extends ClientPlayerEntity {
         }
     }
 
-    @Override
-    public boolean isCollidable() {
-        return false;
-    }
+//    @Override
+//    public boolean isCollidable() {
+//        return false;
+//    }
 
     @Override
     public boolean isPushable() {
