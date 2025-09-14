@@ -1,53 +1,51 @@
 package org.playsi.afkcam.client.config;
 
-import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
-import dev.isxander.yacl3.config.v2.api.SerialEntry;
-import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
-import dev.isxander.yacl3.platform.YACLPlatform;
+import dev.isxander.yacl.config.ConfigEntry;
+import dev.isxander.yacl.config.ConfigInstance;
+import dev.isxander.yacl.config.GsonConfigInstance;
 import lombok.Getter;
 import lombok.Setter;
+import net.fabricmc.loader.api.FabricLoader;
 import org.playsi.afkcam.Afkcam;
-import org.playsi.afkcam.client.AfkcamClient;
 
 @Setter
 @Getter
 public class Config {
-    public static final ConfigClassHandler<Config> GSON = ConfigClassHandler.createBuilder(Config.class)
-            .serializer(config -> GsonConfigSerializerBuilder.create(config)
-                    .setPath(YACLPlatform.getConfigDir().resolve(Afkcam.MOD_ID + ".json"))
-                    .build())
-            .build();
+    public static final ConfigInstance<Config> INSTANCE = new GsonConfigInstance<>(
+            Config.class,
+            FabricLoader.getInstance().getConfigDir().resolve(Afkcam.MOD_ID + ".json")
+    );
 
-    @SerialEntry
+    @ConfigEntry
     private boolean modEnabled = true;
 
-    @SerialEntry
+    @ConfigEntry
     private boolean debugLogEnabled = false;
 
-    @SerialEntry
+    @ConfigEntry
     private float activationAfter = 30f;
 
-//    @SerialEntry
+//    @ConfigEntry
 //    private double cameraSpeed = 1.0;
 
-    @SerialEntry
+    @ConfigEntry
     private boolean disableOnDamage = true;
 
-    @SerialEntry
+    @ConfigEntry
     private boolean disableOnDeath = true;
 
-    @SerialEntry
+    @ConfigEntry
     private boolean loadDefaultAnimation = true;
 
-    @SerialEntry
-   private boolean cameraFollow = false;
+    @ConfigEntry
+    private boolean cameraFollow = false;
 
-//    @SerialEntry
+//    @ConfigEntry
 //    private boolean fade = true;
 //
-//    @SerialEntry
+//    @ConfigEntry
 //    private int fadeIn = 1;
 //
-//    @SerialEntry
+//    @ConfigEntry
 //    private int fadeOut = 1;
 }

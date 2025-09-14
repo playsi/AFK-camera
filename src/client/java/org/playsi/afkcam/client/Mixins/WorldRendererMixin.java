@@ -12,10 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.List;
-
 import static org.playsi.afkcam.client.Camera.FreeCamManager.isEnabled;
-import static org.spongepowered.asm.mixin.injection.callback.LocalCapture.CAPTURE_FAILHARD;
 
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
@@ -25,17 +22,19 @@ public abstract class WorldRendererMixin {
     @Shadow protected abstract void renderEntity(Entity entity, double camX, double camY, double camZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers);
 
     // Makes the player render if showPlayer is enabled.
-    @Inject(method = "renderEntities", at = @At("TAIL"), locals = CAPTURE_FAILHARD)
+    @Inject(method = "render", at = @At("TAIL"))
     private void onRender(
             MatrixStack matrices,
-            VertexConsumerProvider.Immediate vertexConsumers,
+            float tickDelta,
+            long limitTime,
+            boolean renderBlockOutline,
             Camera camera,
-            RenderTickCounter tickCounter,
-            List<Entity> entities,
+            GameRenderer gameRenderer,
+            LightmapTextureManager lightmapTextureManager,
+            net.minecraft.util.math.Matrix4f matrix4f,
             CallbackInfo ci) {
         if (isEnabled()) {
             Vec3d position = camera.getPos();
-            float tickDelta = tickCounter.getTickProgress(false);
             renderEntity(MinecraftClient.getInstance().player, position.x, position.y, position.z, tickDelta, matrices, bufferBuilders.getEntityVertexConsumers());
         }
     }

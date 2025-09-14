@@ -126,7 +126,7 @@ public class FreeCamera extends ClientPlayerEntity {
 
             position.moveForward(negative ? -1 * increment : increment);
             applyPosition(position);
-            if (!wouldNotSuffocateInPose(getPose())) {
+            if (!wouldPoseNotCollide(getPose())) {
                 applyPosition(oldPosition);
                 return distance > 0;
             }
@@ -136,8 +136,8 @@ public class FreeCamera extends ClientPlayerEntity {
     }
 
     public void spawn() {
-        if (clientWorld != null && !clientWorld.hasEntity(this)) {
-            clientWorld.addEntity(this);
+        if (clientWorld != null && clientWorld.getEntityById(this.getId()) == null) {
+            clientWorld.addEntity(this.getId(), this);
         }
     }
 
@@ -148,7 +148,7 @@ public class FreeCamera extends ClientPlayerEntity {
                 clientWorld.removeEntity(customId, RemovalReason.DISCARDED);
             }
 
-            Entity entityByUuid = clientWorld.getEntity(getUuid());
+            Entity entityByUuid = clientWorld.getEntityById(customId);
             if (entityByUuid != null && entityByUuid != existingEntity) {
                 clientWorld.removeEntity(entityByUuid.getId(), RemovalReason.DISCARDED);
             }

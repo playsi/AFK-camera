@@ -22,7 +22,7 @@ public class AFKcamCommands {
                                 List<RawAnimation> animations = AnimationService.getInstance().getAllAnimations();
                                 for (RawAnimation anim : animations) {
                                     builder.suggest(anim.getName());
-                                }
+                               }
                                 return builder.buildFuture();
                             })
                             .executes(ctx -> {

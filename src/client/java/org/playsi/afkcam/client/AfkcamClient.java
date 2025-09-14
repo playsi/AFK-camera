@@ -21,9 +21,8 @@ public class AfkcamClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
 
-        if (Config.GSON.load()) {
-            config = Config.GSON.instance();
-        }
+
+        config = Config.INSTANCE.getConfig();
 
         registerEvents();
 
@@ -31,13 +30,15 @@ public class AfkcamClient implements ClientModInitializer {
         AFKcamCommands.register();
 
     }
-    private void registerEvents() {
 
+    private void registerEvents() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             AFKcameraManager.tick();
         });
+
+        // Fix 2: Change getDynamicDeltaTicks() to getTickDelta() for 1.19.2
         WorldRenderEvents.BEFORE_ENTITIES.register((context) -> {
-           AFKcameraManager.onRender(context.tickCounter().getDynamicDeltaTicks());
+            AFKcameraManager.onRender(context.tickDelta()); // Changed from getDynamicDeltaTicks()
         });
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {

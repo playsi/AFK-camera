@@ -2,11 +2,9 @@ package org.playsi.afkcam.client.modMenu;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
-import dev.isxander.yacl3.api.*;
-import dev.isxander.yacl3.gui.controllers.BooleanController;
-import dev.isxander.yacl3.gui.controllers.string.number.DoubleFieldController;
-import dev.isxander.yacl3.gui.controllers.string.number.FloatFieldController;
-import dev.isxander.yacl3.gui.controllers.string.number.IntegerFieldController;
+import dev.isxander.yacl.api.*;
+import dev.isxander.yacl.gui.controllers.BooleanController;
+import dev.isxander.yacl.gui.controllers.slider.FloatSliderController;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import org.playsi.afkcam.client.AfkcamClient;
@@ -16,134 +14,148 @@ public class ModMenuIntegration implements ModMenuApi {
 
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return parent -> Config().generateScreen(parent);
+        return parent -> createConfigScreen().generateScreen(parent);
     }
 
-    public static YetAnotherConfigLib Config() {
-        return YetAnotherConfigLib.create(Config.GSON, (def, config, builder) -> builder
+    public static YetAnotherConfigLib createConfigScreen() {
+        Config config = Config.INSTANCE.getConfig();
+        Config defaults = new Config();
 
+        return YetAnotherConfigLib.createBuilder()
                 .title(Text.translatable("afkcam.modmenu.title"))
-
                 .category(ConfigCategory.createBuilder()
                         .name(Text.translatable("afkcam.category.general"))
 
-                        .group(OptionGroup.createBuilder()
-
-                                .option(
-                                        Option.<Boolean>createBuilder()
-                                                .name(Text.translatable("afkcam.option.modEnabled"))
-                                                .description(OptionDescription.of(Text.translatable("afkcam.option.modEnabled.desc")))
-                                                .stateManager(StateManager.createSimple(def.isModEnabled(), config::isModEnabled, config::setModEnabled))
-                                                .customController(BooleanController::new)
-                                                .build()
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("afkcam.option.modEnabled"))
+                                .tooltip(Text.translatable("afkcam.option.modEnabled.desc"))
+                                .binding(
+                                        defaults.isModEnabled(),
+                                        () -> config.isModEnabled(),
+                                        value -> config.setModEnabled(value)
                                 )
-
-                                .option(
-                                        Option.<Boolean>createBuilder()
-                                                .name(Text.translatable("afkcam.option.debugLogEnabled"))
-                                                .description(OptionDescription.of(Text.translatable("afkcam.option.debugLogEnabled.desc")))
-                                                .stateManager(StateManager.createSimple(def.isDebugLogEnabled(), config::isDebugLogEnabled, config::setDebugLogEnabled))
-                                                .customController(BooleanController::new)
-                                                .build()
-                                )
-
-                                .option(
-                                        Option.<Float>createBuilder()
-                                                .name(Text.translatable("afkcam.option.activationAfter"))
-                                                .description(OptionDescription.of(Text.translatable("afkcam.option.activationAfter.desc")))
-                                                .stateManager(StateManager.createSimple(def.getActivationAfter(), config::getActivationAfter, config::setActivationAfter))
-                                                .customController(FloatFieldController::new)
-                                                .build()
-                                )
-
-//                                .option(
-//                                        Option.<Double>createBuilder()
-//                                                .name(Text.translatable("afkcam.option.cameraSpeed"))
-//                                                .description(OptionDescription.of(Text.translatable("afkcam.option.cameraSpeed.desc")))
-//                                                .stateManager(StateManager.createSimple(def.getCameraSpeed(), config::getCameraSpeed, config::setCameraSpeed))
-//                                                .customController(DoubleFieldController::new)
-//                                                .build()
-//                                )
-
-//                                .option(
-//                                        Option.<Boolean>createBuilder()
-//                                                .name(Text.translatable("afkcam.option.cameraFollow"))
-//                                                .description(OptionDescription.of(Text.translatable("afkcam.option.cameraFollow.desc")))
-//                                                .stateManager(StateManager.createSimple(def.isCameraFollow(), config::isCameraFollow, config::setCameraFollow))
-//                                                .customController(BooleanController::new)
-//                                                .build()
-//                                )
-
-                                .option(
-                                        Option.<Boolean>createBuilder()
-                                                .name(Text.translatable("afkcam.option.disableOnDamage"))
-                                                .description(OptionDescription.of(Text.translatable("afkcam.option.disableOnDamage.desc")))
-                                                .stateManager(StateManager.createSimple(def.isDisableOnDamage(), config::isDisableOnDamage, config::setDisableOnDamage))
-                                                .customController(BooleanController::new)
-                                                .build()
-                                )
-                                .option(
-                                        Option.<Boolean>createBuilder()
-                                                .name(Text.translatable("afkcam.option.disableOnDeath"))
-                                                .description(OptionDescription.of(Text.translatable("afkcam.option.disableOnDeath.desc")))
-                                                .stateManager(StateManager.createSimple(def.isDisableOnDeath(), config::isDisableOnDeath, config::setDisableOnDeath))
-                                                .customController(BooleanController::new)
-                                                .build()
-                                )
-                                .option(
-                                        Option.<Boolean>createBuilder()
-                                                .name(Text.translatable("afkcam.option.loadDefaultAnimation"))
-                                                .description(OptionDescription.of(Text.translatable("afkcam.option.loadDefaultAnimation.desc")))
-                                                .stateManager(StateManager.createSimple(
-                                                        def.isLoadDefaultAnimation(),
-                                                        config::isLoadDefaultAnimation,
-                                                        value -> {
-                                                            config.setLoadDefaultAnimation(value);
-
-                                                            MinecraftClient client = AfkcamClient.getMC();
-                                                            if (client != null) {
-                                                                client.reloadResources();
-                                                            }
-                                                        }
-                                                ))
-                                                .customController(BooleanController::new)
-                                                .build()
-                                )
+                                .controller(BooleanController::new)
                                 .build())
 
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("afkcam.option.debugLogEnabled"))
+                                .tooltip(Text.translatable("afkcam.option.debugLogEnabled.desc"))
+                                .binding(
+                                        defaults.isDebugLogEnabled(),
+                                        () -> config.isDebugLogEnabled(),
+                                        value -> config.setDebugLogEnabled(value)
+                                )
+                                .controller(BooleanController::new)
+                                .build())
 
-//                        .group(OptionGroup.createBuilder()
-//
-//                                .option(
-//                                        Option.<Boolean>createBuilder()
-//                                                .name(Text.translatable("afkcam.option.fade"))
-//                                                .description(OptionDescription.of(Text.translatable("afkcam.option.fade.desc")))
-//                                                .stateManager(StateManager.createSimple(def.isFade(), config::isFade, config::setFade))
-//                                                .customController(BooleanController::new)
-//                                                .build()
+                        .option(Option.createBuilder(float.class)
+                                .name(Text.translatable("afkcam.option.activationAfter"))
+                                .tooltip(Text.translatable("afkcam.option.activationAfter.desc"))
+                                .binding(
+                                        defaults.getActivationAfter(),
+                                        () -> config.getActivationAfter(),
+                                        value -> config.setActivationAfter(value)
+                                )
+                                .controller(opt -> new FloatSliderController(opt, 1.0f, 300.0f, 1.0f))
+                                .build())
+
+//                        .option(Option.createBuilder(double.class)
+//                                .name(Text.translatable("afkcam.option.cameraSpeed"))
+//                                .tooltip(Text.translatable("afkcam.option.cameraSpeed.desc"))
+//                                .binding(
+//                                        defaults.getCameraSpeed(),
+//                                        () -> config.getCameraSpeed(),
+//                                        value -> config.setCameraSpeed(value)
 //                                )
-//
-//                                .option(
-//                                        Option.<Integer>createBuilder()
-//                                                .name(Text.translatable("afkcam.option.fadeIn"))
-//                                                .description(OptionDescription.of(Text.translatable("afkcam.option.fadeIn.desc")))
-//                                                .stateManager(StateManager.createSimple(def.getFadeIn(), config::getFadeIn, config::setFadeIn))
-//                                                .customController(IntegerFieldController::new)
-//                                                .build()
-//                                )
-//
-//                                .option(
-//                                        Option.<Integer>createBuilder()
-//                                                .name(Text.translatable("afkcam.option.fadeOut"))
-//                                                .description(OptionDescription.of(Text.translatable("afkcam.option.fadeOut.desc")))
-//                                                .stateManager(StateManager.createSimple(def.getFadeOut(), config::getFadeOut, config::setFadeOut))
-//                                                .customController(IntegerFieldController::new)
-//                                                .build()
-//                                )
+//                                .controller(opt -> new DoubleSliderController(opt, 0.1, 5.0, 0.1))
 //                                .build())
-                        .build()
-                )
 
-        );
+//                        .option(Option.createBuilder(boolean.class)
+//                                .name(Text.translatable("afkcam.option.cameraFollow"))
+//                                .tooltip(Text.translatable("afkcam.option.cameraFollow.desc"))
+//                                .binding(
+//                                        defaults.isCameraFollow(),
+//                                        () -> config.isCameraFollow(),
+//                                        value -> config.setCameraFollow(value)
+//                                )
+//                                .controller(BooleanController::new)
+//                                .build())
+
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("afkcam.option.disableOnDamage"))
+                                .tooltip(Text.translatable("afkcam.option.disableOnDamage.desc"))
+                                .binding(
+                                        defaults.isDisableOnDamage(),
+                                        () -> config.isDisableOnDamage(),
+                                        value -> config.setDisableOnDamage(value)
+                                )
+                                .controller(BooleanController::new)
+                                .build())
+
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("afkcam.option.disableOnDeath"))
+                                .tooltip(Text.translatable("afkcam.option.disableOnDeath.desc"))
+                                .binding(
+                                        defaults.isDisableOnDeath(),
+                                        () -> config.isDisableOnDeath(),
+                                        value -> config.setDisableOnDeath(value)
+                                )
+                                .controller(BooleanController::new)
+                                .build())
+
+                        .option(Option.createBuilder(boolean.class)
+                                .name(Text.translatable("afkcam.option.loadDefaultAnimation"))
+                                .tooltip(Text.translatable("afkcam.option.loadDefaultAnimation.desc"))
+                                .binding(
+                                        defaults.isLoadDefaultAnimation(),
+                                        () -> config.isLoadDefaultAnimation(),
+                                        value -> {
+                                            config.setLoadDefaultAnimation(value);
+
+                                            MinecraftClient client = AfkcamClient.getMC();
+                                            if (client != null) {
+                                                client.reloadResources();
+                                            }
+                                        }
+                                )
+                                .controller(BooleanController::new)
+                                .build())
+
+//                        .option(Option.createBuilder(boolean.class)
+//                                .name(Text.translatable("afkcam.option.fade"))
+//                                .tooltip(Text.translatable("afkcam.option.fade.desc"))
+//                                .binding(
+//                                        defaults.isFade(),
+//                                        () -> config.isFade(),
+//                                        value -> config.setFade(value)
+//                                )
+//                                .controller(BooleanController::new)
+//                                .build())
+
+//                        .option(Option.createBuilder(int.class)
+//                                .name(Text.translatable("afkcam.option.fadeIn"))
+//                                .tooltip(Text.translatable("afkcam.option.fadeIn.desc"))
+//                                .binding(
+//                                        defaults.getFadeIn(),
+//                                        () -> config.getFadeIn(),
+//                                        value -> config.setFadeIn(value)
+//                                )
+//                                .controller(opt -> new IntegerSliderController(opt, 1, 10, 1))
+//                                .build())
+
+//                        .option(Option.createBuilder(int.class)
+//                                .name(Text.translatable("afkcam.option.fadeOut"))
+//                                .tooltip(Text.translatable("afkcam.option.fadeOut.desc"))
+//                                .binding(
+//                                        defaults.getFadeOut(),
+//                                        () -> config.getFadeOut(),
+//                                        value -> config.setFadeOut(value)
+//                                )
+//                                .controller(opt -> new IntegerSliderController(opt, 1, 10, 1))
+//                                .build())
+
+                        .build())
+                .save(() -> Config.INSTANCE.save())
+                .build();
     }
 }
