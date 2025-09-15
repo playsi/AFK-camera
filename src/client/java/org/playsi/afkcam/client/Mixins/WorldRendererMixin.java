@@ -5,6 +5,7 @@ import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
+import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,7 +32,7 @@ public abstract class WorldRendererMixin {
             Camera camera,
             GameRenderer gameRenderer,
             LightmapTextureManager lightmapTextureManager,
-            net.minecraft.util.math.Matrix4f matrix4f,
+            Matrix4f positionMatrix,
             CallbackInfo ci) {
         if (isEnabled()) {
             Vec3d position = camera.getPos();

@@ -2,9 +2,12 @@ package org.playsi.afkcam.client.modMenu;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
-import dev.isxander.yacl.api.*;
-import dev.isxander.yacl.gui.controllers.BooleanController;
-import dev.isxander.yacl.gui.controllers.slider.FloatSliderController;
+import dev.isxander.yacl3.api.*;
+import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
+import dev.isxander.yacl3.api.controller.FloatSliderControllerBuilder;
+import dev.isxander.yacl3.gui.controllers.BooleanController;
+import dev.isxander.yacl3.gui.controllers.slider.FloatSliderController;
+import dev.isxander.yacl3.impl.controller.FloatSliderControllerBuilderImpl;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 import org.playsi.afkcam.client.AfkcamClient;
@@ -28,35 +31,38 @@ public class ModMenuIntegration implements ModMenuApi {
 
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("afkcam.option.modEnabled"))
-                                .tooltip(Text.translatable("afkcam.option.modEnabled.desc"))
+                                .description(OptionDescription.of(Text.translatable("afkcam.option.modEnabled.desc")))
                                 .binding(
                                         defaults.isModEnabled(),
                                         () -> config.isModEnabled(),
                                         value -> config.setModEnabled(value)
                                 )
-                                .controller(BooleanController::new)
+                                .controller(BooleanControllerBuilder::create)
                                 .build())
 
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("afkcam.option.debugLogEnabled"))
-                                .tooltip(Text.translatable("afkcam.option.debugLogEnabled.desc"))
+                                .description(OptionDescription.of(Text.translatable("afkcam.option.debugLogEnabled.desc")))
                                 .binding(
                                         defaults.isDebugLogEnabled(),
                                         () -> config.isDebugLogEnabled(),
                                         value -> config.setDebugLogEnabled(value)
                                 )
-                                .controller(BooleanController::new)
+                                .controller(BooleanControllerBuilder::create)
                                 .build())
 
                         .option(Option.createBuilder(float.class)
                                 .name(Text.translatable("afkcam.option.activationAfter"))
-                                .tooltip(Text.translatable("afkcam.option.activationAfter.desc"))
+                                .description(OptionDescription.of(Text.translatable("afkcam.option.activationAfter.desc")))
                                 .binding(
                                         defaults.getActivationAfter(),
                                         () -> config.getActivationAfter(),
                                         value -> config.setActivationAfter(value)
                                 )
-                                .controller(opt -> new FloatSliderController(opt, 1.0f, 300.0f, 1.0f))
+                                .controller(opt -> FloatSliderControllerBuilder.create(opt)
+                                        .range(0.1f, 60.0f)  // Задайте подходящий диапазон
+                                        .step(0.1f)           // Шаг изменения значения
+                                )
                                 .build())
 
 //                        .option(Option.createBuilder(double.class)
@@ -83,29 +89,29 @@ public class ModMenuIntegration implements ModMenuApi {
 
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("afkcam.option.disableOnDamage"))
-                                .tooltip(Text.translatable("afkcam.option.disableOnDamage.desc"))
+                                .description(OptionDescription.of(Text.translatable("afkcam.option.disableOnDamage.desc")))
                                 .binding(
                                         defaults.isDisableOnDamage(),
                                         () -> config.isDisableOnDamage(),
                                         value -> config.setDisableOnDamage(value)
                                 )
-                                .controller(BooleanController::new)
+                                .controller(BooleanControllerBuilder::create)
                                 .build())
 
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("afkcam.option.disableOnDeath"))
-                                .tooltip(Text.translatable("afkcam.option.disableOnDeath.desc"))
+                                .description(OptionDescription.of(Text.translatable("afkcam.option.disableOnDeath.desc")))
                                 .binding(
                                         defaults.isDisableOnDeath(),
                                         () -> config.isDisableOnDeath(),
                                         value -> config.setDisableOnDeath(value)
                                 )
-                                .controller(BooleanController::new)
+                                .controller(BooleanControllerBuilder::create)
                                 .build())
 
                         .option(Option.createBuilder(boolean.class)
                                 .name(Text.translatable("afkcam.option.loadDefaultAnimation"))
-                                .tooltip(Text.translatable("afkcam.option.loadDefaultAnimation.desc"))
+                                .description(OptionDescription.of(Text.translatable("afkcam.option.loadDefaultAnimation.desc")))
                                 .binding(
                                         defaults.isLoadDefaultAnimation(),
                                         () -> config.isLoadDefaultAnimation(),
@@ -118,7 +124,7 @@ public class ModMenuIntegration implements ModMenuApi {
                                             }
                                         }
                                 )
-                                .controller(BooleanController::new)
+                                .controller(BooleanControllerBuilder::create)
                                 .build())
 
 //                        .option(Option.createBuilder(boolean.class)

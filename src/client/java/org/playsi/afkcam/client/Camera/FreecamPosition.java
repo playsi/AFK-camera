@@ -6,7 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
+import org.joml.Vector3f;;
 
 public class FreecamPosition {
     @Getter
@@ -17,9 +17,9 @@ public class FreecamPosition {
     private float yaw, pitch;
 
     // Use Vec3f instead of JOML Vector3f for 1.19.2
-    private Vec3f forward = new Vec3f(0.0f, 0.0f, 1.0f);
-    private Vec3f up = new Vec3f(0.0f, 1.0f, 0.0f);
-    private Vec3f right = new Vec3f(1.0f, 0.0f, 0.0f);
+    private Vector3f forward = new Vector3f(0.0f, 0.0f, 1.0f);
+    private Vector3f up = new Vector3f(0.0f, 1.0f, 0.0f);
+    private Vector3f right = new Vector3f(1.0f, 0.0f, 0.0f);
 
     public FreecamPosition(Entity entity) {
         this.x = entity.getX();
@@ -54,21 +54,21 @@ public class FreecamPosition {
         float sinPitch = (float) Math.sin(pitchRad);
 
         // Forward vector
-        forward = new Vec3f(
+        forward = new Vector3f(
                 sinYaw * cosPitch,
                 -sinPitch,
                 cosYaw * cosPitch
         );
 
         // Up vector (relative to rotation)
-        up = new Vec3f(
+        up = new Vector3f(
                 sinYaw * sinPitch,
                 cosPitch,
                 cosYaw * sinPitch
         );
 
         // Right vector (cross product of forward and world up)
-        right = new Vec3f(cosYaw, 0.0f, -sinYaw);
+        right = new Vector3f(cosYaw, 0.0f, -sinYaw);
     }
 
     // Invert the rotation so that it is mirrored
@@ -85,17 +85,17 @@ public class FreecamPosition {
     // Move relative to current rotation
     // From net.minecraft.client.render.Camera.moveBy
     public void move(double forwardOffset, double upOffset, double rightOffset) {
-        this.x += forward.getX() * forwardOffset + up.getX() * upOffset + right.getX() * rightOffset;
-        this.y += forward.getY() * forwardOffset + up.getY() * upOffset + right.getY() * rightOffset;
-        this.z += forward.getZ() * forwardOffset + up.getZ() * upOffset + right.getZ() * rightOffset;
+        this.x += forward.x() * forwardOffset + up.x() * upOffset + right.x() * rightOffset;
+        this.y += forward.y() * forwardOffset + up.y() * upOffset + right.y() * rightOffset;
+        this.z += forward.z() * forwardOffset + up.z() * upOffset + right.z() * rightOffset;
     }
 
     public ChunkPos getChunkPos() {
         return new ChunkPos((int) (x / 16), (int) (z / 16));
     }
 
-    public Vec3f getPositionVec3f() {
-        return new Vec3f((float) x, (float) y, (float) z);
+    public Vector3f getPositionVec3f() {
+        return new Vector3f((float) x, (float) y, (float) z);
     }
 
     // Alternative method to get position as Vec3d (more common in 1.19.2)

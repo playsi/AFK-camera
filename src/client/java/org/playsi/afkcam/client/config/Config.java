@@ -1,8 +1,8 @@
 package org.playsi.afkcam.client.config;
 
-import dev.isxander.yacl.config.ConfigEntry;
-import dev.isxander.yacl.config.ConfigInstance;
-import dev.isxander.yacl.config.GsonConfigInstance;
+import dev.isxander.yacl3.config.ConfigEntry;
+import dev.isxander.yacl3.config.ConfigInstance;
+import dev.isxander.yacl3.config.GsonConfigInstance;
 import lombok.Getter;
 import lombok.Setter;
 import net.fabricmc.loader.api.FabricLoader;
