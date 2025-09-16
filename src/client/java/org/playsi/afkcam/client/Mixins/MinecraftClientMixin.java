@@ -2,6 +2,7 @@ package org.playsi.afkcam.client.Mixins;
 
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import org.playsi.afkcam.client.AFKmode.AFKcameraManager;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -38,8 +39,8 @@ public class MinecraftClientMixin {
     }
 
     // Disables AFKcam if the player disconnects.
-    @Inject(method = "disconnect()V", at = @At("HEAD"))
-    private void onDisconnect(CallbackInfo ci) {
+    @Inject(method = "disconnect", at = @At("HEAD"))
+    private void onDisconnect(Screen disconnectionScreen, boolean transferring, CallbackInfo ci) {
         AFKcameraManager.onDisconnect();
     }
 }
