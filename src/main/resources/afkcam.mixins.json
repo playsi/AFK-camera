@@ -1,0 +1,19 @@
+{
+    "required": true,
+    "package": "net.playsi.Afkcam.mixin",
+    "refmap": "${mod_id}.refmap.json",
+    "compatibilityLevel": "JAVA_${java}",
+    "mixins": [
+    ],
+    "client": [
+        "CameraTransitionMixin",
+        "ClientPlayerInteractionManagerMixin",
+        "GameRendererMixin",
+        "MinecraftClientMixin",
+        "WorldRendererMixin"
+    ],
+
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

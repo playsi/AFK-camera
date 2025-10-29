@@ -1,0 +1,24 @@
+{
+	"modmenu.descriptionTranslation.${mod_id}": "Клиентский мод, который добавляет кинематографическую камеру когда игрок АФК.",
+	"${mod_id}.modmenu.title": "§l Конфигурация ${mod_name}",
+	"${mod_id}.modmenu.no_config_library_screen.message": "Вам необходимо установить §6§lYet Another Config Lib [YACL]§f, чтобы открыть экран конфигурации ${mod_name} \n\n§a§lОткрыть страницу §6§lYACL §a§lна Modrinth?",
+
+	"${mod_id}.modmenu.category.general.name": "§lОсновное",
+
+	"${mod_id}.modmenu.group.mod_enabled_group.name": "§lОсновные",
+
+	"${mod_id}.modmenu.option.mod_enabled_option.name": "Активировать мод",
+
+	"${mod_id}.modmenu.group.additional_settings_group.name": "§lДополнительные",
+
+	"${mod_id}.modmenu.option.debug_log_enabled.name": "Отладка в консоль",
+	"${mod_id}.modmenu.option.activation_after.name": "Активировать камеру после (секунд)",
+	"${mod_id}.modmenu.option.disable_on_damage.name": "Деактивировать при получении урона",
+	"${mod_id}.modmenu.option.disable_on_death.name": "Деактивировать при смерти",
+	"${mod_id}.modmenu.option.load_default_animation.name": "Загружать стандартные анимации",
+	"${mod_id}.modmenu.option.camera_follow.name": "Камера следует за игроком",
+
+
+	"${mod_id}.modmenu.formatter.enabled_or_disabled.true": "Включено",
+	"${mod_id}.modmenu.formatter.enabled_or_disabled.false": "Отключено"
+}

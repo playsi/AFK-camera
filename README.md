@@ -1,143 +1,84 @@
-OUTATED, maybe I will update on one good day
+### AFK Camera
 
-<img src="src/main/resources/icon/icon.png" align="right" width="190px" alt="mod logo"/>
-
-[![Discord link to the "LopyMine's Project" discord server](https://cdn.modrinth.com/data/cached_images/21f178aff2b64844fefeaf94a3a3a418440fd43f.png)](https://discord.gg/NZzxdkrV4s) [![Support Link-Banner [Boosty]](https://cdn.modrinth.com/data/cached_images/dce91fef079649dee277c52a998fc068e745e99e.png)](https://boosty.to/lopymine/donate)
-
-### Mossy - Template Fabric Mod
+<img src="src/main/resources/icon/icon.png"  width="190px" alt="mod logo"/>
 
 ---
 
-Mossy is a template Fabric mod with some additional tweaks and code templates.
+## Overview
 
-### Tweaks and templates
----
-### Done
-1) Multi-version modding by [Stonecutter](https://stonecutter.kikugie.dev/) plugin
-2) Easy player setting (uuid and nickname) 
-3) Mod Menu Integration
-4) Fast YACL configuration for config screen (WIP)
-5) Mod Config template
-6) Versioned AWs and Mixins
-7) Fast `gradle.properties`, AWs and mixins generation for each version (for 1st point)
-8) Split run folder for `runs/client` and `runs/server`
-### Planned
-9) Add support for multi-loaders
+AFK Camera is a Minecraft mod that automatically activates cinematic camera movements when you're idle. After a configurable period of inactivity (default 30 seconds), the mod seamlessly transitions your camera into a free-cam mode and begins playing smooth, pre-defined camera animations around your world.
+![AFK Camera](https://github.com/playsi/AFK-camera/blob/1.21.5/AFK%20Camera%20preview.gif?raw=true)
+## Features
 
-# How to set up it
-Basically, there are two ways: 
-1) You can fork this template mod and make your mod
-2) You can integrate Mossy build system into your ready-made mod
+- **Automatic AFK Detection**: Monitors player activity including movement, mouse input, key presses, and damage
+- **Smooth Camera Transitions**: Automatically switches to free camera mode with cinematic animations
+- **Configurable Timing**: Customizable AFK timeout period
+- **HUD Management**: Automatically hides the HUD during AFK mode
+- **Animation System**: Supports custom camera keyframe animations with position and rotation interpolation
+- **Smart Deactivation**: Instantly returns to normal gameplay when any player activity is detected
+- **Death Protection**: Optional setting to disable AFK mode when player dies
 
-But we will focus on the second way. In this way you will need to copy files `stonecutter.gradle`, `settings.gradle`, `gradle.properties`, `build.gradle`, `LICENSE`, `Mossy/src/main/resources/fabric.mod.json` and optional `.gitignore`. 
+## How It Works
 
-Then you will need to set up `gradle.properties`.
+The mod continuously monitors for player activity including:
+- Movement keys (WASD, jump, sneak, sprint)
+- Mouse movement
+- Action keys (attack, use, inventory)
+- Player taking damage
+- Menu interactions
 
-## About `gradle.properties`
-- `Mod Properties` contains mod info
-- `Main Dependencies` like `Build Dependencies`, but not versioned
-- `Build Dependencies` contains build properties, usually they versioned
-- `Multi-Versions` basically contains only one property, it's a `multi_versions`, versions in it should be separated with space ' '
-- `Additional Dependencies` contains additional depends, and you can add it easily:
-```properties
-# If you want to have it versioned, just write:
-dep.MOD_ID=[VERSIONED]
-# and add this property to every `Mossy/versions/[MINECRAFT VERSION]/gradle.properties`, if it's boring for you, just remove `gradle.properties` and reload gradle, each `gradle.properties` with last versions of depends will be generated.
-#
-# If you want to have static version, just write:
-dep.MOD_ID=MOD_VERSION
-#
-# READ ME
-# MOD_ID should be taken from Modrinth.
-# `dep.` part is important.
-```
+When no activity is detected for the configured time period, AFK Camera:
+1. Enables free camera mode
+2. Hides the game HUD
+3. Loads and plays cinematic camera animations in a random order
+4. Cycles through available animations continuously
 
-After you can reload gradle and check all updates.
+The moment any player input is detected, the mod immediately:
+1. Stops the current animation
+2. Restores the HUD
+3. Returns camera control to the player
+4. Disables free camera mode
 
-Also don't forgot to add your dependency in `build.gradle` with this value
+## Block Bench Compatibility
 
-## About Mixins and AWs
+This mod is designed to work seamlessly with **Blockbench** camera animations. You can create custom camera paths and keyframe animations in Blockbench, and the mod will automatically load and play them during AFK periods. The animation system supports:
 
-After reloading gradle, in your `resources` folder you will find `mixins` and `aws` folders. In them, you will find generated mixins and AWs for each minecraft version. What version they are for is indicated in their name.
+- Position keyframes with smooth interpolation
+- Rotation keyframes (pitch and yaw)
+- Custom timing and duration
+- Automatic scaling for Minecraft world coordinates
 
-You might be surprised that all mixins have a `.json5` extension instead of `.json`. This is needed to support comments which are needed for the [Stonecutter](https://stonecutter.kikugie.dev/) plugin. In build all mixins will be converted to `.json` by [j52j](https://github.com/kikugie/j52j).
+## Custom camera animations tutorial
+Template [resource pack](https://github.com/playsi/AFK-camera/raw/refs/heads/1.21.5/Rp%20template%20-%20AFK%20Camera.zip).
+Template [BlockBench file](https://github.com/playsi/AFK-camera/blob/1.21.5/Template.bbmodel).
+Detailed text guide - coming soon.
 
-To understand how comments work, I recommend to check the [Stonecutter docs](https://stonecutter.kikugie.dev/stonecutter/introduction).
+## Fabric Only
+This mod is developed for the Fabric mod loader. A **Forge** version is **not planned** due to the significant architectural differences between the platforms and the mod's deep integration with Fabric-specific APIs.
 
-AWs, in turn, have nothing unusual.
+## Dependencies
 
-## About `fabric.mod.json`
-In Mossy, `fabric.mod.json` has some features you should know, here are the main ones:
-```json5
-// ...
-// Other code
-    "depends": {
-        "fabricloader": ">=${fabric_loader}",
-        "minecraft": ">=${minecraft}",
-        "java": ">=${java}",
-        "fabric-api": ">=${fabric_api}"
-    }, // needs because we have multi-versions
-    "accessWidener": "aws/${minecraft}.accesswidener", // needs to get path to AW for current minecraft version
-    "mixins": [
-        "mixins/${minecraft}-${modId}.mixins.json" // needs to get path to mixing config for current minecraft version
-    ]
-// Other code
-// ...
-```
+### Required
+- **[Fabric API](https://modrinth.com/mod/fabric-api)** - Core Fabric mod loader functionality
+- **[YACL](https://modrinth.com/mod/yacl) (Yet Another Config Library)** - Configuration management
 
-## About `player/player.properties`
+### Optional
+- **[Mod Menu](https://modrinth.com/mod/modmenu)** - Provides in-game configuration interface
 
-`Mossy/player/player.properties` is just a properties file, which uses to set up minecraft runs config with properties, to set up your nickname and uuid if they are present. If you want to add it, just create `player` folder in your project, and file `player.properties` with this content:
+## Issues
 
-```properties
-# Player properties
-# If you don't want to change any properties, just remove it
-player_nickname=Cool boy
-player_uuid=Your UUID here
-# After changes, you need to delete "/.idea/runConfigurations" folder and reopen project and reload gradle
-```
+If you find a problem that is not listed, you can report it [here](https://github.com/playsi/AFK-camera/issues).
 
-## About `.json5` files
-At now plugin j52j will convert all `.json5` files in `Mossy/src/main/resources/` to `.json` in build, check [this](https://github.com/kikugie/j52j?tab=readme-ov-file#configuring-the-plugin) if you wanna to safe some files from converting.
+## Acknowledgments
 
-# How to use it
+Big thanks to [hashalite](https://modrinth.com/user/hashalite) for creating [Freecam](https://modrinth.com/mod/freecam)! I used a bit of the code in my project, and it really helped me out. Great work!
 
-## Switching current minecraft version
+Thanks to [ZipeStudio](https://modrinth.com/user/ZipeStudio) for help with IDE.
 
-After settings and reloading gradle, you should have gradle tasks in the `stonecutter` category, select the one and you will switch the active minecraft version of the game to the selected one.
-- `Refresh active project` will refresh project and update comments.
-- `Reset active project` will switch current minecraft version to first of the `multi_versions` in main `gradle.properties` file.
+Thanks to [LopyMine](https://modrinth.com/user/LopyMine/mods) for [Mossy](https://github.com/LopyMine/Mossy) template!
 
-You can check current minecraft version in `stonecutter.gradle` file.
-For more info check the [Stonecutter docs](https://stonecutter.kikugie.dev/stonecutter/introduction).
+Thanks to [Danrus1100](https://modrinth.com/user/danrus110) for contributing!
 
-<details>
-<summary>Showcase</summary>
-<br>
-<img src="img/switching_version.gif" width="400" alt="Showcase"/>
-</details>
+## License
 
-## Launching current minecraft version
-To run current minecraft version with your mod you will need to execute run configuration with the same version, that in `stonecutter.gradle`, to switch it, read previous text above.
-
-Also, your game folder is now split to `Mossy/runs/client` and `Mossy/runs/server`, boop.
-
-<details>
-<summary>Showcase</summary>
-<br>
-<img src="img/launching_minecraft.gif" width="600" alt="Showcase"/>
-<img src="img/launched_mod.png" width="600" alt="Showcase"/>
-</details>
-
-## Building mod
-To build your mod for each minecraft version which you write in main `gradle.properties`, you can just start specified gradle task `chiseledBuild` in `project` group, after execution you can go to `Mossy/versions/[MINECRAFT VERSION]/build/libs/your_builded_mod.jar`.
-
-<details>
-<summary>Showcase</summary>
-<br>
-<img src="img/building_mod.gif"  width="400" alt="Showcase"/>
-
-And after executing `chiseledBuild` task you can check your mods, here is example for minecraft 1.20.1:
-
-<img src="img/mod.png" width="500" alt="Showcase"/>
-</details>
+This project is licensed under the BY-ND 4.0 License - see the LICENSE file for details.

@@ -1,0 +1,22 @@
+{
+	"modmenu.descriptionTranslation.${mod_id}": "A client-side mod that adds a cinematic camera when the player is AFK.",
+	"${mod_id}.modmenu.no_config_library_screen.message": "You need to install §6§lYet Another Config Lib [YACL]§f to open the configuration screen for ${mod_name} \n\n§a§lOpen the §6§lYACL §a§lpage on Modrinth?",
+
+	"${mod_id}.modmenu.category.general.name": "§lGeneral",
+
+	"${mod_id}.modmenu.group.mod_enabled_group.name": "§lMain",
+
+	"${mod_id}.modmenu.option.mod_enabled_option.name": "Enable Mod",
+
+	"${mod_id}.modmenu.group.additional_settings_group.name": "§lAdditional",
+
+	"${mod_id}.modmenu.option.debug_log_enabled.name": "Debug to Console",
+	"${mod_id}.modmenu.option.activation_after.name": "Activate Camera After (second)",
+	"${mod_id}.modmenu.option.disable_on_damage.name": "Disable on Damage",
+	"${mod_id}.modmenu.option.disable_on_death.name": "Disable on Death",
+	"${mod_id}.modmenu.option.load_default_animation.name": "Load Default Animations",
+	"${mod_id}.modmenu.option.camera_follow.name": "Camera Follows Player",
+
+	"${mod_id}.modmenu.formatter.enabled_or_disabled.true": "Enabled",
+	"${mod_id}.modmenu.formatter.enabled_or_disabled.false": "Disabled"
+}

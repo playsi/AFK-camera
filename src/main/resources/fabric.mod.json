@@ -16,13 +16,13 @@
     "environment": "*",
     "entrypoints": {
         "main": [
-            "net.lopymine.mossy.Mossy"
+            "net.playsi.Afkcam.Afkcam"
         ],
         "client": [
-            "net.lopymine.mossy.client.MossyClient"
+            "net.playsi.Afkcam.client.AfkcamClient"
         ],
         "modmenu": [
-            "net.lopymine.mossy.modmenu.ModMenuIntegration"
+            "net.playsi.Afkcam.modmenu.ModMenuIntegration"
         ]
     },
     "depends": {
