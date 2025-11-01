@@ -40,7 +40,7 @@ public class MinecraftClientMixin {
     //? if >= 1.21.9 {
     /*@Inject(method = "disconnect(Lnet/minecraft/client/gui/screen/Screen;Z)V", at = @At("HEAD"))
     *///?} else
-    @Inject(method = "disconnect()V", at = @At("HEAD"))
+    @Inject(method = "disconnect", at = @At("HEAD"))
 
     private void onDisconnect(CallbackInfo ci) {
         AFKCamLoopState.onDisconnect();
