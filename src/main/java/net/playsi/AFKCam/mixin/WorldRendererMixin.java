@@ -26,7 +26,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 //? if > 1.20.2
-/*import net.minecraft.world.tick.TickManager;*/
+import net.minecraft.world.tick.TickManager;
 
 //? if <= 1.21.1
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
@@ -63,25 +63,25 @@ public abstract class WorldRendererMixin {
         @Unique
         private static final MinecraftClient MC = MinecraftClient.getInstance();
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;checkEmpty(Lnet/minecraft/client/util/math/MatrixStack;)V", ordinal = 0))
+        @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;checkEmpty(Lnet/minecraft/client/util/math/MatrixStack;)V", ordinal = 0))
         private void onRender(
                               //? if <= 1.20.4
-                              MatrixStack matrices,
+                              /*MatrixStack matrices,*/
 
                               //? <= 1.20.6 {
-                               float tickDeltaQ,
+                               /*float tickDeltaQ,
                                long limitTime,
-                              //?}
+                              *///?}
 
                               //? if >= 1.21
-                              /*RenderTickCounter tickCounter,*/
+                              RenderTickCounter tickCounter,
                               boolean renderBlockOutline,
                               Camera camera,
                               GameRenderer gameRenderer,
                               LightmapTextureManager lightmapTextureManager,
                               Matrix4f matrix4f,
                               //? if > 1.20.4
-                              /*Matrix4f matrix4f2,*/
+                              Matrix4f matrix4f2,
                               CallbackInfo ci) {
 
             if (!FreeCamManager.isEnabled() && MC.world != null) return;
@@ -89,19 +89,17 @@ public abstract class WorldRendererMixin {
 
             float tickDelta =
                     //? if >= 1.21
-                    /*tickCounter.getTickDelta(false);*/
+                    tickCounter.getTickDelta(false);
                     //? if <= 1.20.6
-                    tickDeltaQ;
+                    /*tickDeltaQ;*/
 
             //? if >= 1.21
-            /*LOGGER.info("tickDelta:  " + tickDelta);*/
 
             AFKCamLoopState.onRender(tickDelta);
 
             //? if > 1.20.4 {
-            /*MatrixStack matrices = new MatrixStack();
-            matrices.multiplyPositionMatrix(matrix4f);
-            *///?}
+            MatrixStack matrices = new MatrixStack();
+            //?}
 
             double renderX = MC.player.lastRenderX + (MC.player.getX() - MC.player.lastRenderX) * tickDelta;
             double renderY = MC.player.lastRenderY + (MC.player.getY() - MC.player.lastRenderY) * tickDelta;
@@ -119,7 +117,7 @@ public abstract class WorldRendererMixin {
                     entityRenderDispatcher.getLight(MC.player, tickDelta)
             );
             //? if > 1.20.4
-            /*matrices.pop();*/
+            matrices.pop();
         }
     }
 
