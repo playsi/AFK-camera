@@ -52,8 +52,6 @@ import static org.spongepowered.asm.mixin.injection.callback.LocalCapture.CAPTUR
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
 
-    private static final LogUtils LOGGER = new LogUtils(WorldRendererMixin.class);
-
     @Shadow
     @Final
     private BufferBuilderStorage bufferBuilders;
@@ -65,7 +63,7 @@ public abstract class WorldRendererMixin {
         @Unique
         private static final MinecraftClient MC = MinecraftClient.getInstance();
 
-        @Inject(method = "render", at = @At("TAIL"), locals = CAPTURE_FAILHARD)
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;checkEmpty(Lnet/minecraft/client/util/math/MatrixStack;)V", ordinal = 0))
         private void onRender(
                               //? if <= 1.20.4
                               MatrixStack matrices,
@@ -105,10 +103,6 @@ public abstract class WorldRendererMixin {
             matrices.multiplyPositionMatrix(matrix4f);
             *///?}
 
-            VertexConsumerProvider.Immediate vertexConsumers =
-                    MC.getBufferBuilders().getEntityVertexConsumers();
-
-
             double renderX = MC.player.lastRenderX + (MC.player.getX() - MC.player.lastRenderX) * tickDelta;
             double renderY = MC.player.lastRenderY + (MC.player.getY() - MC.player.lastRenderY) * tickDelta;
             double renderZ = MC.player.lastRenderZ + (MC.player.getZ() - MC.player.lastRenderZ) * tickDelta;
@@ -121,10 +115,9 @@ public abstract class WorldRendererMixin {
                     MC.player.getYaw(),
                     tickDelta,
                     matrices,
-                    vertexConsumers,
+                    bufferBuilders.getEntityVertexConsumers(),
                     entityRenderDispatcher.getLight(MC.player, tickDelta)
             );
-            vertexConsumers.draw();
             //? if > 1.20.4
             /*matrices.pop();*/
         }
