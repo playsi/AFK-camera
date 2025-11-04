@@ -24,15 +24,12 @@ public class AFKCamLoopState {
     private static final Config CONFIG = Config.getInstance();
     private static final LogUtils LOGGER = new LogUtils(AFKCamLoopState.class);
 
-    private static final float SCALE_FACTOR = 1.0f / 16.0f;
-
     @Getter
     private static boolean isAfkModeActive = false;
 
-    private static long lastActivityTime = System.currentTimeMillis();
+    @Getter
+    private static List<RawAnimation> loadedAnimations = new ArrayList<>();
 
-
-    private static List<RawAnimation> availableAnimations = new ArrayList<>();
     private static int currentAnimationIndex = 0;
     private static Random animationRandom = new Random();
 
@@ -42,9 +39,9 @@ public class AFKCamLoopState {
 
     public static void tick() {
         if (CONFIG.isModEnabled() || !isInWorld()) {
-            if (!isAfkModeActive && shouldActivateAfkMode()) {
+            if (!isAfkModeActive && AFKCondition.shouldActivateAfkMode()) {
                 activateAfkMode();
-                tickAfkMode(); //TODO проверить
+
             } else if (isAfkModeActive && !AFKCondition.hasAFKConditions()) {
                 deactivateAfkMode();
             }
@@ -64,7 +61,7 @@ public class AFKCamLoopState {
             MC.options.hudHidden = true;
 
             deactivateAfkMode();
-            lastActivityTime = System.currentTimeMillis();
+            AFKCondition.resetLastActivityTime();
         }
 
         if (isAfkModeActive) {
@@ -72,22 +69,7 @@ public class AFKCamLoopState {
         }
     }
 
-    /**
-     * Проверка, нужно ли активировать AFK режим
-     */
-    private static boolean shouldActivateAfkMode() {
-        if (!isInWorld()) return false;
-        if (isAfkModeActive) return false;
-        if (!AFKCondition.hasAFKConditions()){
-            lastActivityTime = System.currentTimeMillis();
-        }
-        long timeSinceActivity = System.currentTimeMillis() - lastActivityTime;
-        return timeSinceActivity >= (long) CONFIG.getActivationAfter() * 1000L;
-    }
-
-
-
-    private static boolean isInWorld() {
+    public static boolean isInWorld() {
         return MC.world != null && MC.player != null && !MC.isPaused();
     }
 
@@ -97,11 +79,13 @@ public class AFKCamLoopState {
     private static void activateAfkMode() {
         LOGGER.infoDebug("Активация AFK режима камеры");
 
-        loadAvailableAnimations();
-        if (availableAnimations.isEmpty()) {
-            LOGGER.warn("Нет доступных анимаций для AFK режима");
+        loadAvailableAnimations(loadedAnimations);
+        if (loadedAnimations.isEmpty()) {
+            LOGGER.warn("No available animations!");
             return;
         }
+
+        setAnimationsQueue();
 
         isAfkModeActive = true;
 
@@ -136,7 +120,7 @@ public class AFKCamLoopState {
 
         //fadeManager.startFadeIn(null);
 
-        lastActivityTime = System.currentTimeMillis();
+        AFKCondition.resetLastActivityTime();
         //});
     }
 
@@ -146,47 +130,40 @@ public class AFKCamLoopState {
         }
     }
 
-    private static void loadAvailableAnimations() {
-        availableAnimations.clear();
+    private static void loadAvailableAnimations( List<RawAnimation> listToLoad) {
+        listToLoad.clear();
+        listToLoad.addAll(AnimationService.getInstance().getAllAnimations());
+        LOGGER.infoDebug("Загружено " + listToLoad.size() + " доступных анимаций");
+    }
 
-        //List<RawAnimation> allAnimations = AFKcamResourceReloadListener.getCachedAnimations();
+    private static void setAnimationsQueue() {
         currentAnimationIndex = 0;
-// for feature
-//        for (ParsedAnimation animation : allAnimations) {
-//            if (validator.isAnimationValid(animation)) {
-//                ParsedAnimation trimmedAnimation = validator.trimAnimationForCollisions(animation);
-//                if (trimmedAnimation != null) {
-//                    availableAnimations.add(trimmedAnimation);
-//                }
-//            }
-//        }
+        Collections.shuffle(loadedAnimations, animationRandom);
 
-        availableAnimations = new ArrayList<>(AnimationService.getInstance().getAllAnimations());
-        LOGGER.infoDebug("Загружено " + availableAnimations.size() + " доступных анимаций");
-
-        Collections.shuffle(availableAnimations, animationRandom);
     }
 
     /**
      * Запуск следующей анимации
      */
     private static void startNextAnimation() {
-        if (availableAnimations.isEmpty()) {
+        if (loadedAnimations.isEmpty()) {
             LOGGER.warnDebug("No animations available for playback");
             deactivateAfkMode();
             return;
         }
 
-        RawAnimation nextAnimation = availableAnimations.get(currentAnimationIndex);
-        currentAnimationIndex = (currentAnimationIndex + 1) % availableAnimations.size();
+        RawAnimation nextAnimation = loadedAnimations.get(currentAnimationIndex);
+        currentAnimationIndex = (currentAnimationIndex + 1) % loadedAnimations.size();
 
         if (currentAnimationIndex == 0) {
-            Collections.shuffle(availableAnimations, animationRandom);
+            Collections.shuffle(loadedAnimations, animationRandom);
         }
 
         LOGGER.infoDebug("Start animation: " + nextAnimation.getName());
 
         convertAndLoadAnimation(nextAnimation);
+        //TODO сначала кешировать потом проверять потом грузить, колбек при обновлении анимаций
+        //TODO реализовать проверку анимаций
 
         // Начинаем проявление и запускаем анимацию
         //fadeManager.startFadeIn(() -> {
@@ -195,140 +172,6 @@ public class AFKCamLoopState {
     }
 
 
-    /**
-     * Конвертация ParsedAnimation в формат CameraAnimationManager
-     */
-    private static void convertAndLoadAnimation(RawAnimation animation) {
-        CameraAnimationManager.clearKeyframes();
-
-        List<RawAnimation.Keyframe> posFrames = animation.getPositionKeyframes();
-        List<RawAnimation.Keyframe> rotFrames = animation.getRotationKeyframes();
-
-        Map<Float, RawAnimation.Keyframe> rotationMap = new HashMap<>();
-        for (RawAnimation.Keyframe rotFrame : rotFrames) {
-            rotationMap.put(rotFrame.getTime(), rotFrame);
-        }
-
-        for (RawAnimation.Keyframe posFrame : posFrames) {
-            float time = posFrame.getTime();
-            float[] position = posFrame.getValues();
-
-            float[] rotation = findOrInterpolateRotation(rotFrames, time);
-
-            CameraKeyframe.InterpolationType interpType = CameraKeyframe.InterpolationType.LINEAR; //TODO
-
-            CameraAnimationManager.addKeyframe(
-                    time,
-                    position[0] * SCALE_FACTOR, position[1] * SCALE_FACTOR, position[2] * SCALE_FACTOR,
-                    rotation[1], rotation[0],
-                    interpType
-            );
-        }
-
-        for (RawAnimation.Keyframe rotFrame : rotFrames) {
-            float time = rotFrame.getTime();
-            if (posFrames.stream().noneMatch(pf -> Math.abs(pf.getTime() - time) < 0.001f)) {
-                float[] position = findOrInterpolatePosition(posFrames, time);
-                float[] rotation = rotFrame.getValues();
-
-                CameraAnimationManager.addKeyframe(
-                        time,
-                        position[0] * SCALE_FACTOR, position[1] * SCALE_FACTOR, position[2] * SCALE_FACTOR,
-                        rotation[1], rotation[0], // yaw, pitch
-                        CameraKeyframe.InterpolationType.LINEAR
-                );
-            }
-        }
-    }
-
-    private static float[] findOrInterpolateRotation(List<RawAnimation.Keyframe> rotFrames, float time) {
-        if (rotFrames.isEmpty()) return new float[]{0, 0};
-
-        for (RawAnimation.Keyframe frame : rotFrames) {
-            if (Math.abs(frame.getTime() - time) < 0.001f) {
-                return frame.getValues();
-            }
-        }
-
-        RawAnimation.Keyframe prevFrame = null;
-        RawAnimation.Keyframe nextFrame = null;
-
-        for (RawAnimation.Keyframe frame : rotFrames) {
-            if (frame.getTime() <= time) {
-                prevFrame = frame;
-            } else if (nextFrame == null) {
-                nextFrame = frame;
-                break;
-            }
-        }
-
-        if (prevFrame == null) return rotFrames.get(0).getValues();
-        if (nextFrame == null) return rotFrames.get(rotFrames.size() - 1).getValues();
-
-        float t = (time - prevFrame.getTime()) / (nextFrame.getTime() - prevFrame.getTime());
-        float[] prevRot = prevFrame.getValues();
-        float[] nextRot = nextFrame.getValues();
-
-        return new float[]{
-                prevRot[0] + (nextRot[0] - prevRot[0]) * t, // pitch
-                prevRot[1] + (nextRot[1] - prevRot[1]) * t  // yaw
-        };
-    }
-
-    private static float[] findOrInterpolatePosition(List<RawAnimation.Keyframe> posFrames, float time) {
-        if (posFrames.isEmpty()) return new float[]{0, 0, 0};
-
-        for (RawAnimation.Keyframe frame : posFrames) {
-            if (Math.abs(frame.getTime() - time) < 0.001f) {
-                float[] values = frame.getValues();
-                return new float[]{
-                        values[0] * SCALE_FACTOR,
-                        values[1] * SCALE_FACTOR,
-                        values[2] * SCALE_FACTOR
-                };
-            }
-        }
-
-        RawAnimation.Keyframe prevFrame = null;
-        RawAnimation.Keyframe nextFrame = null;
-
-        for (RawAnimation.Keyframe frame : posFrames) {
-            if (frame.getTime() <= time) {
-                prevFrame = frame;
-            } else if (nextFrame == null) {
-                nextFrame = frame;
-                break;
-            }
-        }
-
-        if (prevFrame == null) {
-            float[] values = posFrames.get(0).getValues();
-            return new float[]{
-                    values[0] * SCALE_FACTOR,
-                    values[1] * SCALE_FACTOR,
-                    values[2] * SCALE_FACTOR
-            };
-        }
-        if (nextFrame == null) {
-            float[] values = posFrames.get(posFrames.size() - 1).getValues();
-            return new float[]{
-                    values[0] * SCALE_FACTOR,
-                    values[1] * SCALE_FACTOR,
-                    values[2] * SCALE_FACTOR
-            };
-        }
-
-        float t = (time - prevFrame.getTime()) / (nextFrame.getTime() - prevFrame.getTime());
-        float[] prevPos = prevFrame.getValues();
-        float[] nextPos = nextFrame.getValues();
-
-        // Интерполируем и масштабируем
-        return new float[]{
-                (prevPos[0] + (nextPos[0] - prevPos[0]) * t) * SCALE_FACTOR,
-                (prevPos[1] + (nextPos[1] - prevPos[1]) * t) * SCALE_FACTOR,
-                (prevPos[2] + (nextPos[2] - prevPos[2]) * t) * SCALE_FACTOR
-        };
-    }
 
     public static void onDisconnect() {
         deactivateAfkMode();

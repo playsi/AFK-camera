@@ -3,10 +3,8 @@ package net.playsi.Afkcam.client.Camera;
 import lombok.Getter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
-import net.playsi.Afkcam.client.AFKmodeState.HUDManager;
 import net.playsi.Afkcam.client.AfkcamClient;
 import net.playsi.Afkcam.config.Config;
-import net.playsi.Afkcam.utils.ConfigUtils;
 import net.playsi.Afkcam.utils.LogUtils;
 
 
@@ -42,6 +40,7 @@ public class CameraAnimationManager {
     public static void addKeyframe(double time, double x, double y, double z, double yaw, double pitch,
                                    CameraKeyframe.InterpolationType interpolation) {
         CameraKeyframe keyframe = new CameraKeyframe(time, x, y, z, yaw, pitch, interpolation);
+        //TODO интерполяция розделена на движение и вращение переписать логику
 
         int insertIndex = 0;
         for (int i = 0; i < keyframes.size(); i++) {

@@ -16,6 +16,24 @@ public class AFKCondition {
     @Setter
     private static float playerLastHp = 0.0f;
 
+    private static long lastActivityTime = System.currentTimeMillis();
+    private static long timeSinceActivity = 0;
+
+
+    /**
+     * Проверка, нужно ли активировать AFK режим
+     */
+    public static boolean shouldActivateAfkMode() {
+        if (AFKCamLoopState.isAfkModeActive() ||
+                !AFKCamLoopState.isInWorld()) return false;
+
+        if (!hasAFKConditions()){
+            AFKCondition.resetLastActivityTime();
+        }
+        return AFKCondition.playerIsAFKLongTime();
+    }
+
+
     public static boolean hasAFKConditions() {
         if (MC.player == null) return false;
 
@@ -55,6 +73,15 @@ public class AFKCondition {
                 MC.options.attackKey.isPressed()            ||
                 MC.options.playerListKey.isPressed()        ||
                 MC.options.togglePerspectiveKey.isPressed() ;
+    }
+
+    public static void resetLastActivityTime(){
+        lastActivityTime = System.currentTimeMillis();
+    }
+
+    public static boolean playerIsAFKLongTime(){
+        timeSinceActivity = System.currentTimeMillis() - lastActivityTime;
+        return timeSinceActivity >= (long) CONFIG.getActivationAfter() * 1000L;
     }
 
 }

@@ -10,7 +10,7 @@ public class Afkcam implements ModInitializer {
 
 	public static final String MOD_NAME = /*$ mod_name*/ "AFK camera";
 	public static final String MOD_ID = /*$ mod_id*/ "afkcam";
-	public static final String YACL_DEPEND_VERSION = /*$ yacl*/ "3.6.2+1.20.1-fabric";
+	public static final String YACL_DEPEND_VERSION = /*$ yacl*/ "3.8.0+1.21.9-fabric";
 
 	public static Identifier id(String path) {
 		return Identifier.of(MOD_ID, path);

@@ -39,12 +39,12 @@ public class AFKcamResourceReloadListener implements SimpleResourceReloadListene
     }
 
     @Override
-    public CompletableFuture<List<RawAnimation>> load(ResourceManager resourceManager, /*? if <=1.21.1*/ Profiler profiler, /*?*/ Executor executor) {
+    public CompletableFuture<List<RawAnimation>> load(ResourceManager resourceManager, /*? if <=1.21.1*/ /*Profiler profiler,*/ /*?*/ Executor executor) {
         return CompletableFuture.supplyAsync(() -> ANIM_SERVICE.onLoadRPs(resourceManager), executor);
     }
 
     @Override
-    public CompletableFuture<Void> apply(List<RawAnimation> rawAnimations, ResourceManager resourceManager, /*? if <=1.21.1*/ Profiler profiler, /*?*/ Executor executor) {
+    public CompletableFuture<Void> apply(List<RawAnimation> rawAnimations, ResourceManager resourceManager, /*? if <=1.21.1*/ /*Profiler profiler,*/ /*?*/ Executor executor) {
         return CompletableFuture.runAsync(() -> ANIM_SERVICE.onApplyRPs(rawAnimations), executor);
     }
 }

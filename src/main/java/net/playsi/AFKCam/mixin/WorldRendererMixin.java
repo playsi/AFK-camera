@@ -9,10 +9,12 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
 
+import net.minecraft.world.tick.TickManager;
 import net.playsi.Afkcam.client.AFKmodeState.AFKCamLoopState;
 import net.playsi.Afkcam.client.AfkcamClient;
 import net.playsi.Afkcam.client.Animations.Parser.BbModelAnim;
 import net.playsi.Afkcam.client.Camera.FreeCamManager;
+import net.playsi.Afkcam.debug.DebugContent;
 import net.playsi.Afkcam.utils.LogUtils;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -24,29 +26,23 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
 //? if > 1.20.2
-import net.minecraft.world.tick.TickManager;
 
 //? if <= 1.21.1
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
+/*import net.minecraft.client.render.entity.EntityRenderDispatcher;*/
 
 //? if > 1.21.1 {
-/*import net.minecraft.client.render.entity.state.EntityRenderState;
+import net.minecraft.client.render.entity.state.EntityRenderState;
 import net.minecraft.client.util.ObjectAllocator;
-*///?}
+//?}
 
 //? if > 1.21.5
-/*import com.mojang.blaze3d.buffers.GpuBufferSlice;*/
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 
 //? if > 1.21.8 {
-/*import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.state.WorldRenderState;
-*///?}
+//?}
 
-import java.util.List;
-
-import static org.spongepowered.asm.mixin.injection.callback.LocalCapture.CAPTURE_FAILHARD;
 
 @Slf4j
 @Mixin(WorldRenderer.class)
@@ -58,7 +54,7 @@ public abstract class WorldRendererMixin {
 
     //? if <= 1.21.1 {
 
-        @Shadow @Final private EntityRenderDispatcher entityRenderDispatcher;
+        /*@Shadow @Final private EntityRenderDispatcher entityRenderDispatcher;
 
         @Unique
         private static final MinecraftClient MC = MinecraftClient.getInstance();
@@ -66,12 +62,12 @@ public abstract class WorldRendererMixin {
         @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;checkEmpty(Lnet/minecraft/client/util/math/MatrixStack;)V", ordinal = 0))
         private void onRender(
                               //? if <= 1.20.4
-                              /*MatrixStack matrices,*/
+                              /^MatrixStack matrices,^/
 
                               //? <= 1.20.6 {
-                               /*float tickDeltaQ,
+                               /^float tickDeltaQ,
                                long limitTime,
-                              *///?}
+                              ^///?}
 
                               //? if >= 1.21
                               RenderTickCounter tickCounter,
@@ -91,11 +87,12 @@ public abstract class WorldRendererMixin {
                     //? if >= 1.21
                     tickCounter.getTickDelta(false);
                     //? if <= 1.20.6
-                    /*tickDeltaQ;*/
-
-            //? if >= 1.21
+                    /^tickDeltaQ;^/
 
             AFKCamLoopState.onRender(tickDelta);
+
+            //DEBUG
+            DebugContent.debug();
 
             //? if > 1.20.4 {
             MatrixStack matrices = new MatrixStack();
@@ -122,7 +119,7 @@ public abstract class WorldRendererMixin {
     }
 
 
-    //?} else if <= 1.21.8 {
+    *///?} else if <= 1.21.8 {
     /*@Shadow
     protected abstract void renderEntity(Entity entity, double camX, double camY, double camZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers);
 
@@ -145,6 +142,8 @@ public abstract class WorldRendererMixin {
                     getTickDelta(MinecraftClient.getInstance().player.isFrozen());
                     //?}
                 AFKCamLoopState.onRender(tickDelta);
+                //DEBUG
+                			DebugContent.debug();
 
                 Vec3d position = camera.getPos();
                 renderEntity(MinecraftClient.getInstance().player, position.x, position.y, position.z, tickDelta, matrices, bufferBuilders.getEntityVertexConsumers());
@@ -154,7 +153,7 @@ public abstract class WorldRendererMixin {
 
     *///?} else if > 1.21.8 {
 
-    /*@Shadow public abstract void render(ObjectAllocator allocator, RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, Matrix4f positionMatrix, Matrix4f matrix4f, Matrix4f projectionMatrix, GpuBufferSlice fogBuffer, Vector4f fogColor, boolean renderSky);
+    @Shadow public abstract void render(ObjectAllocator allocator, RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, Matrix4f positionMatrix, Matrix4f matrix4f, Matrix4f projectionMatrix, GpuBufferSlice fogBuffer, Vector4f fogColor, boolean renderSky);
 
     @Shadow @Nullable public abstract Framebuffer getEntityFramebuffer();
 
@@ -173,6 +172,9 @@ public abstract class WorldRendererMixin {
                 WorldRenderState renderStates,
                 CallbackInfo ci
         ) {
+            //DEBUG
+            DebugContent.debug();
+
             if (FreeCamManager.isEnabled() && MC.world != null ) {
 
                 ClientPlayerEntity player = MC.player;
@@ -184,8 +186,9 @@ public abstract class WorldRendererMixin {
                 renderStates.entityRenderStates.add(playerRenderState);
 
                 AFKCamLoopState.onRender(tickDelta);
+
                 //TODO при афк игрок игнорирует события, камера не успевает за игроком, игрок дергаеться
             }
         }
 }
-*///?}
+//?}

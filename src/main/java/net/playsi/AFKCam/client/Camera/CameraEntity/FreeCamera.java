@@ -14,7 +14,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 //? if > 1.21.5
-/*import net.minecraft.util.PlayerInput;*/
+import net.minecraft.util.PlayerInput;
 
 
 public class FreeCamera extends ClientPlayerEntity {
@@ -29,8 +29,8 @@ public class FreeCamera extends ClientPlayerEntity {
     private float lastAppliedPitch = Float.NaN;
 
     /*? if >= 1.21.8 {*/
-    /*ClientWorld clientWorld = MinecraftClient.getInstance().world;
-    *//*?}*/
+    ClientWorld clientWorld = MinecraftClient.getInstance().world;
+    /*?}*/
     
     public FreeCamera(int id) {
         super(
@@ -40,10 +40,10 @@ public class FreeCamera extends ClientPlayerEntity {
                 MC.player != null ? MC.player.getStatHandler() : null,
                 MC.player != null ? MC.player.getRecipeBook() : null,
                 //? if <= 1.21.5 {
-                false,
-                //?} else {
-                /*new PlayerInput(false, false, false, false, false, false, false),
-                *///?}
+                /*false,
+                *///?} else {
+                new PlayerInput(false, false, false, false, false, false, false),
+                //?}
                 false
         );
 
@@ -142,10 +142,10 @@ public class FreeCamera extends ClientPlayerEntity {
             applyPosition(position);
             if (
                     //? if > 1.20.1 {
-                    /*!wouldNotSuffocateInPose(getPose())
-                    *///?} else {
-                    wouldPoseNotCollide(getPose())
-                    //?}
+                    !wouldNotSuffocateInPose(getPose())
+                    //?} else {
+                    /*wouldPoseNotCollide(getPose())
+                    *///?}
             ) {
                 applyPosition(oldPosition);
                 return distance > 0;
@@ -157,7 +157,7 @@ public class FreeCamera extends ClientPlayerEntity {
 
     public void spawn() {
         if (clientWorld != null && clientWorld.getEntityById(this.getId()) != null) {
-            clientWorld.addEntity(/*? if <= 1.20.1 {*/ this.getId(), /*?}*/this);
+            clientWorld.addEntity(/*? if <= 1.20.1 {*/ /*this.getId(), *//*?}*/this);
         }
     }
 

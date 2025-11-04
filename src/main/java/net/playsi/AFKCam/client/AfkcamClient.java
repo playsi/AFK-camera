@@ -12,6 +12,9 @@ import net.playsi.Afkcam.client.Camera.FreeCamManager;
 import net.playsi.Afkcam.client.command.AFKcamCommands;
 import net.playsi.Afkcam.config.Config;
 
+ //DEBUG
+import net.playsi.Afkcam.debug.DebugOverlayRenderer;
+
 
 public class AfkcamClient implements ClientModInitializer {
 	@Getter
@@ -22,6 +25,8 @@ public class AfkcamClient implements ClientModInitializer {
 		registerEvents();
 		AFKcamResourceReloadListener.register();
 		AFKcamCommands.register();
+		//DEBUG
+		DebugOverlayRenderer.register();
 	}
 
 	private void registerEvents() {
@@ -37,7 +42,7 @@ public class AfkcamClient implements ClientModInitializer {
 		ClientEntityEvents.ENTITY_LOAD.register((entity, world) -> {
 			if (entity == MC.player && Config.getInstance().isModEnabled()) {
 				FreeCamManager.moveToPlayer();
-			}
+		}
 		});
 	}
 }
