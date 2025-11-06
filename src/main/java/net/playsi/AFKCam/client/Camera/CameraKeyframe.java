@@ -11,7 +11,9 @@ public class CameraKeyframe {
     private double time;
     private double x, y, z;
     private double yaw, pitch;
-    private InterpolationType interpolation;
+
+    private InterpolationType positionInterpolation;
+    private InterpolationType rotationInterpolation;
 
     public enum InterpolationType {
         STEP,
@@ -19,14 +21,17 @@ public class CameraKeyframe {
         CATMULLROM
     }
 
-    public CameraKeyframe(float time, FreecamPosition position, InterpolationType interpolation) {
+    public CameraKeyframe(float time, FreecamPosition position,
+                          InterpolationType positionInterpolation,
+                          InterpolationType rotationInterpolation) {
         this.time = time;
         this.x = position.getX();
         this.y = position.getY();
         this.z = position.getZ();
         this.yaw = position.getYaw();
         this.pitch = position.getPitch();
-        this.interpolation = interpolation;
+        this.positionInterpolation = positionInterpolation;
+        this.rotationInterpolation = rotationInterpolation;
     }
 
     public FreecamPosition toFreecamPosition() {

@@ -38,9 +38,10 @@ public class CameraAnimationManager {
     private static final double SMOOTHING_FACTOR = 0.15; // Коэффициент сглаживания
 
     public static void addKeyframe(double time, double x, double y, double z, double yaw, double pitch,
-                                   CameraKeyframe.InterpolationType interpolation) {
-        CameraKeyframe keyframe = new CameraKeyframe(time, x, y, z, yaw, pitch, interpolation);
-        //TODO интерполяция розделена на движение и вращение переписать логику
+                                   CameraKeyframe.InterpolationType positionInterpolation,
+                                   CameraKeyframe.InterpolationType rotationInterpolation) {
+        CameraKeyframe keyframe = new CameraKeyframe(time, x, y, z, yaw, pitch,
+                positionInterpolation, rotationInterpolation);
 
         int insertIndex = 0;
         for (int i = 0; i < keyframes.size(); i++) {
@@ -57,7 +58,7 @@ public class CameraAnimationManager {
             LOGGER.infoDebug("Keyframe added at " + time + "seconds: " + keyframe);
         }
     }
-
+    // TODO етить колотить все очень плохо
     public static boolean removeKeyframe(int index) {
         if (index >= 0 && index < keyframes.size()) {
             CameraKeyframe removed = keyframes.remove(index);
@@ -311,34 +312,48 @@ public class CameraAnimationManager {
     private static FreecamPosition interpolate(CameraKeyframe prev, CameraKeyframe next, double t) {
         FreecamPosition result = new FreecamPosition();
 
-        switch (prev.getInterpolation()) {
-            case STEP:
-                if (t < 0.5) {
-                    result.setX(prev.getX());
-                    result.setY(prev.getY());
-                    result.setZ(prev.getZ());
-                    result.setRotation((float) prev.getYaw(), (float) prev.getPitch());
-                } else {
-                    result.setX(next.getX());
-                    result.setY(next.getY());
-                    result.setZ(next.getZ());
-                    result.setRotation((float) next.getYaw(), (float) next.getPitch());
-                }
-                break;
+        switch (prev.getPositionInterpolation()) {
+            case STEP -> {
+                result.setX(t < 0.5 ? prev.getX() : next.getX());
+                result.setY(t < 0.5 ? prev.getY() : next.getY());
+                result.setZ(t < 0.5 ? prev.getZ() : next.getZ());
+            }
 
-            case LINEAR:
+            case LINEAR -> {
                 result.setX(lerp(prev.getX(), next.getX(), t));
                 result.setY(lerp(prev.getY(), next.getY(), t));
                 result.setZ(lerp(prev.getZ(), next.getZ(), t));
+            }
+
+            case CATMULLROM -> { // smoothstep для плавности
+                double smoothT = t * t * (3.0 - 2.0 * t);
+                result.setX(lerp(prev.getX(), next.getX(), smoothT));
+                result.setY(lerp(prev.getY(), next.getY(), smoothT));
+                result.setZ(lerp(prev.getZ(), next.getZ(), smoothT));
+            }
+        }
+        switch (prev.getRotationInterpolation()) {
+            case STEP -> {
                 result.setRotation(
-                        (float) lerpAngle(prev.getYaw(), next.getYaw(), t),
+                         t < 0.5 ? (float) prev.getYaw()   : (float) next.getYaw(),
+                         t < 0.5 ? (float) prev.getPitch() : (float) next.getPitch()
+                );
+            }
+
+            case LINEAR -> {
+                result.setRotation(
+                        (float) lerpAngle(prev.getYaw(),   next.getYaw(), t),
                         (float) lerpAngle(prev.getPitch(), next.getPitch(), t)
                 );
-                break;
+            }
 
-            case CATMULLROM:
-                result = catmullRomInterpolate(prev, next, t);
-                break;
+            case CATMULLROM -> { // smoothstep для плавного вращения
+                double smoothT = t * t * (3.0 - 2.0 * t);
+                result.setRotation(
+                        (float) lerpAngle(prev.getYaw(),   next.getYaw(), smoothT),
+                        (float) lerpAngle(prev.getPitch(), next.getPitch(), smoothT)
+                );
+            }
         }
 
         return result;

@@ -1,6 +1,7 @@
 package net.playsi.Afkcam.client.AFKmodeState;
 
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.client.MinecraftClient;
 import net.playsi.Afkcam.client.AfkcamClient;
 import net.playsi.Afkcam.client.Animations.AnimationService;
@@ -28,6 +29,7 @@ public class AFKCamLoopState {
     private static boolean isAfkModeActive = false;
 
     @Getter
+    @Setter
     private static List<RawAnimation> loadedAnimations = new ArrayList<>();
 
     private static int currentAnimationIndex = 0;
@@ -35,12 +37,15 @@ public class AFKCamLoopState {
 
 //    private static ScreenFadeManager fadeManager = new ScreenFadeManager();
 
-//    private static AnimationValidator validator = new AnimationValidator();
-
     public static void tick() {
+
         if (CONFIG.isModEnabled() || !isInWorld()) {
             if (!isAfkModeActive && AFKCondition.shouldActivateAfkMode()) {
-                activateAfkMode();
+
+                if (loadedAnimations.isEmpty())
+                    if (loadAvailableAnimations(loadedAnimations))
+                        activateAfkMode();
+
 
             } else if (isAfkModeActive && !AFKCondition.hasAFKConditions()) {
                 deactivateAfkMode();
@@ -51,6 +56,7 @@ public class AFKCamLoopState {
 //            if (CONFIG.isFade()) {
 //              fadeManager.tick();
 //            }
+
         }
     }
 
@@ -79,7 +85,6 @@ public class AFKCamLoopState {
     private static void activateAfkMode() {
         LOGGER.infoDebug("Активация AFK режима камеры");
 
-        loadAvailableAnimations(loadedAnimations);
         if (loadedAnimations.isEmpty()) {
             LOGGER.warn("No available animations!");
             return;
@@ -130,10 +135,11 @@ public class AFKCamLoopState {
         }
     }
 
-    private static void loadAvailableAnimations( List<RawAnimation> listToLoad) {
+    private static boolean loadAvailableAnimations( List<RawAnimation> listToLoad) {
         listToLoad.clear();
         listToLoad.addAll(AnimationService.getInstance().getAllAnimations());
-        LOGGER.infoDebug("Загружено " + listToLoad.size() + " доступных анимаций");
+        LOGGER.infoDebug("Loaded " + listToLoad.size() + " animations");
+        return !listToLoad.isEmpty();
     }
 
     private static void setAnimationsQueue() {
