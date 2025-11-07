@@ -244,4 +244,9 @@ public class FreeCamera extends ClientPlayerEntity {
         lastAppliedYaw = Float.NaN;
         lastAppliedPitch = Float.NaN;
     }
+
+    public FreecamPosition CurrentPosition() {
+        return new FreecamPosition(this);
+    }
+
 }
